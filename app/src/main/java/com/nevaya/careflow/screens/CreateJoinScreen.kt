@@ -16,11 +16,12 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun CreateJoinScreen(modifier: Modifier = Modifier) {
-// Creates a screen function with an optional modifier
+// Main composable function for the Join/Create screen, accepts an optional Modifier
 
     var showJoinField by remember { mutableStateOf(false) }
     var joinCode by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
+    //tracks if valid input is added, input field should be visible, and optional modifier
 
     Box(
         modifier = modifier
@@ -45,22 +46,22 @@ fun CreateJoinScreen(modifier: Modifier = Modifier) {
                     .fillMaxWidth()
                     .padding(start = 20.dp, top = 20.dp),
                 verticalAlignment = Alignment.CenterVertically
-            ) {
+            ) { //Row for the back button and text, aligned vertically center
 
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
                     tint = Color.White
-                )
+                )//back button
 
                 Spacer(modifier = Modifier.width(6.dp))
 
                 Text(
                     text = "back",
                     color = Color.White
-                )
+                ) //back button text
             }
-            //back button under logo on the left
+            //placed back button under logo on the left
 
             Spacer(modifier = Modifier.weight(1f))
 
@@ -78,7 +79,7 @@ fun CreateJoinScreen(modifier: Modifier = Modifier) {
                 Column(
                     modifier = Modifier.padding(32.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
-                ) {
+                ) {//made column inside that white box
 
                     Button(
                         onClick = { showJoinField = true },
@@ -89,7 +90,7 @@ fun CreateJoinScreen(modifier: Modifier = Modifier) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(45.dp)
-                    ) {
+                    ) {//button join code
                         Text(
                             text = "Join Code",
                             color = Color(0xFF25343F)
@@ -118,7 +119,7 @@ fun CreateJoinScreen(modifier: Modifier = Modifier) {
 
 
                     if (showJoinField) {
-
+//show join code input
                         Spacer(modifier = Modifier.height(24.dp))
 
                         OutlinedTextField(
@@ -130,13 +131,13 @@ fun CreateJoinScreen(modifier: Modifier = Modifier) {
                                 } else {
                                     errorMessage = "Numbers only (4-6 digits)"
                                 }
-                            },
+                            },//update join code if only input is digits
                             label = { Text("Enter Code") },
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Number
-                            ),
+                            ),//gives numeric keyboard
                             singleLine = true
-                        )
+                        )//limits input into a single line
 
                         if (errorMessage.isNotEmpty()) {
                             Spacer(modifier = Modifier.height(6.dp))
@@ -144,7 +145,7 @@ fun CreateJoinScreen(modifier: Modifier = Modifier) {
                             Text(
                                 text = errorMessage,
                                 color = Color.Red
-                            )
+                            )//show error message if a number isn't entered
                         }
                     }
                     //join code input appears when button pressed
@@ -152,6 +153,6 @@ fun CreateJoinScreen(modifier: Modifier = Modifier) {
             }
 
             Spacer(modifier = Modifier.weight(1f))
-        }
+        }//moves card to center
     }
 }
