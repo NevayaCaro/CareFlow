@@ -9,14 +9,16 @@ import com.nevaya.careflow.ui.screens.LoginScreen
 import com.nevaya.careflow.ui.screens.ForgotPasswordScreen
 import com.nevaya.careflow.ui.screens.AuthorizationScreen
 import com.nevaya.careflow.ui.screens.CreateAccountScreen
+import com.nevaya.careflow.ui.screens.ProfileScreen
 
 @Composable
 fun AppNavGraph(navController: NavHostController) {
     NavHost(
         navController = navController,
-        startDestination = "splash"
+        startDestination = "profile"
     ) {
 
+        // 🔹 SPLASH
         composable("splash") {
             SplashScreen(
                 onSplashFinished = {
@@ -27,6 +29,7 @@ fun AppNavGraph(navController: NavHostController) {
             )
         }
 
+        // 🔹 LOGIN
         composable("login") {
             LoginScreen(
                 onForgotPassword = { navController.navigate("forgot_password") },
@@ -34,6 +37,7 @@ fun AppNavGraph(navController: NavHostController) {
             )
         }
 
+        // 🔹 FORGOT PASSWORD
         composable("forgot_password") {
             ForgotPasswordScreen(
                 onBack = { navController.popBackStack() },
@@ -41,24 +45,41 @@ fun AppNavGraph(navController: NavHostController) {
             )
         }
 
+        // 🔹 AUTHORIZATION
         composable("authorization") {
             AuthorizationScreen(
                 onBack = { navController.popBackStack() },
                 onSubmit = {
-                    // TODO: Reset password screen
+                    // Future: navigate to reset password screen
                 }
             )
         }
 
-        // NEW CREATE ACCOUNT SCREEN
+        // 🔹 CREATE ACCOUNT
         composable("create_account") {
             CreateAccountScreen(
                 onSubmit = {
-                    // Your partner will decide what happens next
-                    // Example: navController.navigate("profile")
+                    navController.navigate("profile") {
+                        popUpTo("create_account") { inclusive = true }
+                    }
                 },
                 onBack = {
                     navController.popBackStack()
+                }
+            )
+        }
+
+        // 🔹 PROFILE SCREEN (NEW)
+        composable("profile") {
+            ProfileScreen(
+                onEditProfile = {
+
+                },
+                onViewSchedule = {
+                    navController.navigate("schedule")
+                },
+                onViewAssignments = {
+                    navController.navigate("assignments")
                 }
             )
         }
