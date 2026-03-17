@@ -9,6 +9,7 @@ import com.nevaya.careflow.ui.screens.LoginScreen
 import com.nevaya.careflow.ui.screens.ForgotPasswordScreen
 import com.nevaya.careflow.ui.screens.AuthorizationScreen
 import com.nevaya.careflow.ui.screens.CreateAccountScreen
+import com.nevaya.careflow.ui.screens.ProfileScreen
 
 @Composable
 fun AppNavGraph(navController: NavHostController) {
@@ -59,6 +60,20 @@ fun AppNavGraph(navController: NavHostController) {
                 },
                 onBack = {
                     navController.popBackStack()
+                }
+            )
+        }
+
+        composable("profile") {
+            ProfileScreen(
+                onEditProfile = {
+
+                },
+                onViewSchedule = {
+                    navController.navigate("schedule")
+                },
+                onViewAssignments = {
+                    navController.navigate("assignments")
                 }
             )
         }
