@@ -15,7 +15,7 @@ import com.nevaya.careflow.ui.screens.ProfileScreen
 fun AppNavGraph(navController: NavHostController) {
     NavHost(
         navController = navController,
-        startDestination = "splash"
+        startDestination = "profile"
     ) {
 
         composable("splash") {
