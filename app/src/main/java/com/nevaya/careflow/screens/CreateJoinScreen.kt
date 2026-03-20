@@ -156,3 +156,5 @@ fun CreateJoinScreen(modifier: Modifier = Modifier) {
         }//moves card to center
     }
 }
+
+

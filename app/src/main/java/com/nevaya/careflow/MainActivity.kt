@@ -3,47 +3,33 @@ package com.nevaya.careflow
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.nevaya.careflow.screens.CreateJoinScreen
-import com.nevaya.careflow.ui.theme.CareFlowTheme
+import com.nevaya.careflow.screens.CreateScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-            CareFlowTheme {
-                Scaffold(
-                    modifier = Modifier.fillMaxSize()
-                ) { innerPadding ->
-                    CreateJoinScreen(
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+            // Show your CreateScreen on app launch
+            Scaffold(
+                modifier = Modifier.fillMaxSize()
+            ) { innerPadding ->
+                CreateScreen(
+                    modifier = Modifier.padding(innerPadding)
+                )
             }
         }
     }
 }
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
-    CareFlowTheme {
-        Greeting("Android")
-    }
+fun CreateScreenPreview() {
+    CreateScreen()
 }
