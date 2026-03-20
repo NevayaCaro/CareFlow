@@ -13,9 +13,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.nevaya.careflow.ui.theme.GreenDark
+import com.nevaya.careflow.ui.theme.GreenPrimary
+
 
 @Composable
-fun CreateJoinScreen(modifier: Modifier = Modifier) {
+fun CreateJoinScreen(
+    modifier: Modifier = Modifier,
+    onCreateClick: () -> Unit
+) {
 // Main composable function for the Join/Create screen, accepts an optional Modifier
 
     var showJoinField by remember { mutableStateOf(false) }
@@ -26,7 +32,8 @@ fun CreateJoinScreen(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFFBFC9D1)) // screen background color
+            .background(MaterialTheme.colorScheme.background) // uses AppBackground
+
     ) {
 
         Column(
@@ -51,15 +58,12 @@ fun CreateJoinScreen(modifier: Modifier = Modifier) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
-                    tint = Color.White
-                )//back button
-
-                Spacer(modifier = Modifier.width(6.dp))
-
+                    tint = GreenDark                             // back button also PurpleDark
+                ) //back button
                 Text(
                     text = "back",
-                    color = Color.White
-                ) //back button text
+                    color = MaterialTheme.colorScheme.onSecondary
+                )//back button text
             }
             //placed back button under logo on the left
 
@@ -68,12 +72,13 @@ fun CreateJoinScreen(modifier: Modifier = Modifier) {
             Card(
                 shape = RoundedCornerShape(22.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = Color.White
+                    containerColor = GreenPrimary,           // Purple card
+                    contentColor = MaterialTheme.colorScheme.onPrimary // white text/icons inside
                 ),
                 modifier = Modifier
                     .width(320.dp)
                     .align(Alignment.CenterHorizontally)
-            ) {
+            ){
                 //white box centered in middle of screen
 
                 Column(
@@ -84,7 +89,8 @@ fun CreateJoinScreen(modifier: Modifier = Modifier) {
                     Button(
                         onClick = { showJoinField = true },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFD1D7DB)
+                            containerColor = GreenDark,                // PurpleDark button
+                            contentColor = MaterialTheme.colorScheme.onPrimary // white text
                         ),
                         shape = RoundedCornerShape(50.dp),
                         modifier = Modifier
@@ -93,7 +99,6 @@ fun CreateJoinScreen(modifier: Modifier = Modifier) {
                     ) {//button join code
                         Text(
                             text = "Join Code",
-                            color = Color(0xFF25343F)
                         )
                     }
                     //rounded join code button
@@ -101,19 +106,17 @@ fun CreateJoinScreen(modifier: Modifier = Modifier) {
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Button(
-                        onClick = { /* TODO: Create Shift */ },
+                        onClick = { onCreateClick() },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFD1D7DB)
+                            containerColor = GreenDark,                // PurpleDark button
+                            contentColor = MaterialTheme.colorScheme.onPrimary // white text
                         ),
                         shape = RoundedCornerShape(50.dp),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(45.dp)
                     ) {
-                        Text(
-                            text = "Create",
-                            color = Color(0xFF25343F)
-                        )
+                        Text(text = "Create")
                     }
                     //second rounded button
 
