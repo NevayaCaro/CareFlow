@@ -1,10 +1,12 @@
 package com.nevaya.careflow
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.*
 import androidx.navigation.compose.rememberNavController
 import com.nevaya.careflow.navigation.AppNavGraph
+import com.nevaya.careflow.ui.components.MainScreenWithFloatingMenu
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -18,8 +20,12 @@ class MainActivity : ComponentActivity() {
                     showSplash = false
                 }
             } else {
-                AppNavGraph(navController = navController)
+                MainScreenWithFloatingMenu(navController) { padding ->
+                    AppNavGraph(navController, padding)
+                }
             }
         }
     }
 }
+
+

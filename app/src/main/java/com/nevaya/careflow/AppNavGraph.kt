@@ -1,24 +1,22 @@
 package com.nevaya.careflow.navigation
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.nevaya.careflow.SplashScreen
-import com.nevaya.careflow.ui.screens.LoginScreen
-import com.nevaya.careflow.ui.screens.ForgotPasswordScreen
-import com.nevaya.careflow.ui.screens.AuthorizationScreen
-import com.nevaya.careflow.ui.screens.CreateAccountScreen
-import com.nevaya.careflow.ui.screens.ProfileScreen
+import com.nevaya.careflow.ui.screens.*
 
 @Composable
-fun AppNavGraph(navController: NavHostController) {
+fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
+
     NavHost(
         navController = navController,
-        startDestination = "profile"
+        startDestination = "settings"
     ) {
 
-        // 🔹 SPLASH
+        // SPLASH
         composable("splash") {
             SplashScreen(
                 onSplashFinished = {
@@ -29,7 +27,7 @@ fun AppNavGraph(navController: NavHostController) {
             )
         }
 
-        // 🔹 LOGIN
+        // LOGIN
         composable("login") {
             LoginScreen(
                 onForgotPassword = { navController.navigate("forgot_password") },
@@ -37,7 +35,7 @@ fun AppNavGraph(navController: NavHostController) {
             )
         }
 
-        // 🔹 FORGOT PASSWORD
+        // FORGOT PASSWORD
         composable("forgot_password") {
             ForgotPasswordScreen(
                 onBack = { navController.popBackStack() },
@@ -45,17 +43,15 @@ fun AppNavGraph(navController: NavHostController) {
             )
         }
 
-        // 🔹 AUTHORIZATION
+        // AUTHORIZATION
         composable("authorization") {
             AuthorizationScreen(
                 onBack = { navController.popBackStack() },
-                onSubmit = {
-                    // Future: navigate to reset password screen
-                }
+                onSubmit = { }
             )
         }
 
-        // 🔹 CREATE ACCOUNT
+        // CREATE ACCOUNT
         composable("create_account") {
             CreateAccountScreen(
                 onSubmit = {
@@ -63,25 +59,42 @@ fun AppNavGraph(navController: NavHostController) {
                         popUpTo("create_account") { inclusive = true }
                     }
                 },
-                onBack = {
-                    navController.popBackStack()
-                }
+                onBack = { navController.popBackStack() }
             )
         }
 
-        // 🔹 PROFILE SCREEN (NEW)
+        // PROFILE
         composable("profile") {
             ProfileScreen(
-                onEditProfile = {
-
-                },
-                onViewSchedule = {
-                    navController.navigate("schedule")
-                },
-                onViewAssignments = {
-                    navController.navigate("assignments")
-                }
+                onEditProfile = {},
+                onViewSchedule = { navController.navigate("schedule") },
+                onViewAssignments = { navController.navigate("assignments") }
             )
+        }
+
+        // HOME (updated)
+        composable("home") {
+            HomeScreen(padding)
+        }
+
+        // SCHEDULE (updated)
+        composable("schedule") {
+            ScheduleScreen(padding)
+        }
+
+        // ASSIGNMENTS (updated)
+        composable("assignments") {
+            RoomAssignmentsScreen(padding)
+        }
+
+        // MESSAGES (updated)
+        composable("messages") {
+            MessagesScreen(padding)
+        }
+
+        // SETTINGS (updated)
+        composable("settings") {
+            SettingsScreen(padding)
         }
     }
 }
