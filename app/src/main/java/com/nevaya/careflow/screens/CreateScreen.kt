@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import com.nevaya.careflow.ui.theme.*
 
 // Nurse assignment data
@@ -37,6 +38,7 @@ fun CreateScreen(
     var showersText by remember { mutableStateOf(TextFieldValue("")) }
     var mealsText by remember { mutableStateOf(TextFieldValue("")) }
     var editIndex by remember { mutableStateOf<Int?>(null) }
+    var selectedRooms by remember { mutableStateOf(setOf<Int>()) }
 
     // Step 3: Rooms
     var firstRoom by remember { mutableStateOf(TextFieldValue("")) }
@@ -49,21 +51,20 @@ fun CreateScreen(
         modifier = modifier
             .fillMaxSize()
             .background(AppBackground)
-            .padding(16.dp)
     ) {
 
         // TOP BACK BUTTON (for all steps except step 1)
         Button(
             onClick = {
                 if (currentStep == 1) {
-                    // Step 1: go back to CreateJoinScreen.kt
                     onBackClick()
                 } else {
-                    // Step 2 or 3: go back to Step 1
                     currentStep = 1
                 }
             },
-            modifier = Modifier.align(Alignment.TopStart),
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .zIndex(10f),
             colors = ButtonDefaults.buttonColors(containerColor = GreenDark)
         ) {
             Text("Back", color = MaterialTheme.colorScheme.onPrimary)
@@ -73,7 +74,9 @@ fun CreateScreen(
             text = "CODE: $generatedCode",
             color = TextPrimary,
             fontSize = 22.sp,
-            modifier = Modifier.align(Alignment.TopEnd)
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .zIndex(10f)
         )
 
         when (currentStep) {
@@ -299,7 +302,7 @@ fun CreateScreen(
                         }
                     }
 
-                    // OPTIONAL: Show current rooms for debug
+                    // Show current rooms for debug
                     if (roomsList.isNotEmpty()) {
                         Text("Rooms: ${roomsList.joinToString(", ")}", color = TextPrimary)
                     }
@@ -311,17 +314,75 @@ fun CreateScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .align(Alignment.Center)
-                        .verticalScroll(rememberScrollState()),
+                        .verticalScroll(rememberScrollState())
+                        .padding(start = 16.dp, end = 16.dp, top = 100.dp, bottom = 80.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
 
+
                     EditableCard("Nurse/CNA Name", nurseName) { nurseName = it }
-                    EditableCard("Rooms", roomsText) { roomsText = it }
+
+                    if (roomsList.isNotEmpty()) {
+
+                        Card(
+                            shape = RoundedCornerShape(22.dp),
+                            colors = CardDefaults.cardColors(containerColor = GreenPrimary),
+                            modifier = Modifier
+                                .fillMaxWidth(0.9f)
+                                .wrapContentHeight()
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+
+                                Text("Rooms", fontSize = 18.sp, color = TextPrimary)
+
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+
+                                    roomsList.chunked(3).forEach { rowRooms ->
+                                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+
+                                            rowRooms.forEach { room ->
+
+                                                val isSelected = selectedRooms.contains(room)
+
+                                                Button(
+                                                    onClick = {
+                                                        selectedRooms = if (isSelected) {
+                                                            selectedRooms - room
+                                                        } else {
+                                                            selectedRooms + room
+                                                        }
+                                                    },
+                                                    colors = ButtonDefaults.buttonColors(
+                                                        containerColor = if (isSelected) GreenDark else CardBackground
+                                                    ),
+                                                    modifier = Modifier.weight(1f)
+                                                ) {
+                                                    Text(
+                                                        text = room.toString(),
+                                                        color = MaterialTheme.colorScheme.onPrimary
+                                                    )
+                                                }
+                                            }
+
+                                            repeat(3 - rowRooms.size) {
+                                                Spacer(modifier = Modifier.weight(1f))
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+
                     EditableCard("Showers", showersText) { showersText = it }
                     EditableCard("Meals", mealsText) { mealsText = it }
+
+
 
                     Spacer(modifier = Modifier.height(24.dp))
 
@@ -329,7 +390,7 @@ fun CreateScreen(
                         onClick = {
                             val newAssignment = NurseAssignment(
                                 name = nurseName.text,
-                                rooms = roomsText.text,
+                                rooms = selectedRooms.sorted().joinToString(", "),
                                 showers = showersText.text,
                                 meals = mealsText.text
                             )
