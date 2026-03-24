@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.nevaya.careflow.ui.theme.CareFlowTheme
 
 @Composable
 fun ProfileScreen(
@@ -20,7 +21,6 @@ fun ProfileScreen(
     onViewAssignments: () -> Unit = {}
 ) {
 
-    // 🔥 CLOCK STATE
     var isClockedIn by remember { mutableStateOf(false) }
 
     Surface(
@@ -31,10 +31,10 @@ fun ProfileScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(20.dp)
+                .padding(30.dp)
         ) {
 
-            // 🔹 HEADER (Profile Info)
+            // HEADER
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -52,28 +52,44 @@ fun ProfileScreen(
                         Icon(
                             imageVector = Icons.Default.Person,
                             contentDescription = "Profile Picture",
-                            modifier = Modifier.size(40.dp)
+                            modifier = Modifier.size(40.dp),
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
 
                     Spacer(modifier = Modifier.width(12.dp))
 
                     Column {
-                        Text("John Doe", fontSize = 20.sp)
-                        Text("@johndoe", fontSize = 14.sp)
+                        Text(
+                            "John Doe",
+                            fontSize = 20.sp,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        Text(
+                            "@johndoe",
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                        )
                     }
                 }
 
                 IconButton(onClick = onEditProfile) {
-                    Icon(Icons.Default.Edit, contentDescription = "Edit Profile")
+                    Icon(
+                        Icons.Default.Edit,
+                        contentDescription = "Edit Profile",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 🔹 SHIFT STATUS CARD (NOW DYNAMIC)
+            // STATUS CARD
             Card(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
             ) {
                 Row(
                     modifier = Modifier
@@ -83,29 +99,45 @@ fun ProfileScreen(
                 ) {
 
                     Column {
-                        Text("Status", fontSize = 14.sp)
+                        Text(
+                            "Status",
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
                         Text(
                             if (isClockedIn) "On Duty" else "Off Duty",
-                            fontSize = 18.sp
+                            fontSize = 18.sp,
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
 
                     Column(horizontalAlignment = Alignment.End) {
                         Text(
                             if (isClockedIn) "Clocked In At" else "Last Clock Out",
-                            fontSize = 14.sp
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
-                        Text("7:00 AM") // later → replace with real time
+                        Text(
+                            "7:00 AM",
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
                     }
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 8.dp),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+            )
 
-            // 🔹 PERSONAL INFO
-            Text("Personal Information", fontSize = 18.sp)
+            // PERSONAL INFO
+            Text(
+                "Personal Information",
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.onBackground
+            )
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -115,55 +147,95 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 8.dp),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+            )
 
-            // 🔹 WORK INFO
-            Text("Work Information", fontSize = 18.sp)
+            // WORK INFO
+            Text(
+                "Work Information",
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.onBackground
+            )
 
             Spacer(modifier = Modifier.height(12.dp))
 
             Card(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
 
-                    Text("Next Shift", fontSize = 16.sp)
-                    Text("March 18, 2026 - 7:00 AM to 3:00 PM")
+                    Text(
+                        "Next Shift",
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        "March 18, 2026 - 7:00 AM to 3:00 PM",
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Text("Room Assignment", fontSize = 16.sp)
-                    Text("Room 204 – J.S.")
-                    Text("• Fall Risk")
-                    Text("• Assisted Mobility")
+                    Text(
+                        "Room Assignment",
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text("Room 204 – J.S.", color = MaterialTheme.colorScheme.onSurface)
+                    Text("• Fall Risk", color = MaterialTheme.colorScheme.onSurface)
+                    Text("• Assisted Mobility", color = MaterialTheme.colorScheme.onSurface)
 
                     Spacer(modifier = Modifier.height(16.dp))
 
+                    // FULL SCHEDULE BUTTON
                     Button(
                         onClick = onViewSchedule,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
                     ) {
                         Text("View Full Schedule")
                     }
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // 🔹 ACTION BUTTONS (FULLY FUNCTIONAL)
+                    // ACTION BUTTONS
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
 
-                        // ✅ CLOCK BUTTON (TOGGLE)
                         OutlinedButton(
-                            onClick = { isClockedIn = !isClockedIn }
+                            onClick = { isClockedIn = !isClockedIn },
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = MaterialTheme.colorScheme.primary
+                            ),
+                            border = ButtonDefaults.outlinedButtonBorder.copy(
+                                brush = androidx.compose.ui.graphics.SolidColor(
+                                    MaterialTheme.colorScheme.primary
+                                )
+                            )
                         ) {
                             Text(if (isClockedIn) "Clock Out" else "Clock In")
                         }
 
-                        // ✅ ASSIGNMENTS BUTTON
                         OutlinedButton(
-                            onClick = onViewAssignments
+                            onClick = onViewAssignments,
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = MaterialTheme.colorScheme.primary
+                            ),
+                            border = ButtonDefaults.outlinedButtonBorder.copy(
+                                brush = androidx.compose.ui.graphics.SolidColor(
+                                    MaterialTheme.colorScheme.primary
+                                )
+                            )
                         ) {
                             Text("Assignments")
                         }
@@ -182,8 +254,17 @@ fun ProfileInfoRow(label: String, value: String) {
             .padding(vertical = 6.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(label)
-        Text(value)
+        Text(
+            label,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Text(
+            value,
+            color = MaterialTheme.colorScheme.onBackground
+        )
     }
 }
+
+
+
 

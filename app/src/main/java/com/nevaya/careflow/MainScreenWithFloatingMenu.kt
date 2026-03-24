@@ -1,5 +1,6 @@
 package com.nevaya.careflow.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
@@ -12,6 +13,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
+import com.nevaya.careflow.ui.theme.CareFlowTheme
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,14 +33,12 @@ fun MainScreenWithFloatingMenu(
         }
     ) { padding ->
 
-        // FIX: Apply padding here so menu is NOT under the top bar
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
         ) {
 
-            // Screen content (no padding needed here)
             content(PaddingValues())
 
             // Floating menu layer
@@ -46,21 +48,31 @@ fun MainScreenWithFloatingMenu(
                     .zIndex(10f)
             ) {
 
-                // Menu button anchor
                 Box(
                     modifier = Modifier
-                        .padding(5.dp)
+                        .padding(8.dp)
                         .align(Alignment.TopStart)
                 ) {
 
-                    IconButton(onClick = { menuExpanded = true }) {
+                    // GREEN MENU BUTTON
+                    IconButton(
+                        onClick = { menuExpanded = true },
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) {
                         Icon(Icons.Default.Menu, contentDescription = "Menu")
                     }
 
+                    // GREEN DROPDOWN MENU
                     DropdownMenu(
                         expanded = menuExpanded,
-                        onDismissRequest = { menuExpanded = false }
+                        onDismissRequest = { menuExpanded = false },
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.surface)
                     ) {
+
                         FloatingMenuItem("Home", Icons.Default.Home) {
                             navController.navigate("home")
                             menuExpanded = false
@@ -103,8 +115,19 @@ fun FloatingMenuItem(
     onClick: () -> Unit
 ) {
     DropdownMenuItem(
-        text = { Text(title) },
-        leadingIcon = { Icon(icon, contentDescription = title) },
+        text = {
+            Text(
+                title,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        },
+        leadingIcon = {
+            Icon(
+                icon,
+                contentDescription = title,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
         onClick = onClick
     )
 }

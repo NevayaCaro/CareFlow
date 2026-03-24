@@ -66,11 +66,13 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
         // PROFILE
         composable("profile") {
             ProfileScreen(
-                onEditProfile = {},
+                onEditProfile = { /* navigate to edit screen later */ },
                 onViewSchedule = { navController.navigate("schedule") },
                 onViewAssignments = { navController.navigate("assignments") }
             )
         }
+
+
 
         // HOME (updated)
         composable("home") {
