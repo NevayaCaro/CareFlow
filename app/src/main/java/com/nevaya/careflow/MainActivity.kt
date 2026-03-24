@@ -3,47 +3,29 @@ package com.nevaya.careflow
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.nevaya.careflow.screens.CreateJoinScreen
-import com.nevaya.careflow.ui.theme.CareFlowTheme
+import androidx.compose.runtime.*
+import androidx.navigation.compose.rememberNavController
+import com.nevaya.careflow.navigation.AppNavGraph
+import com.nevaya.careflow.ui.components.MainScreenWithFloatingMenu
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
-            CareFlowTheme {
-                Scaffold(
-                    modifier = Modifier.fillMaxSize()
-                ) { innerPadding ->
-                    CreateJoinScreen(
-                        modifier = Modifier.padding(innerPadding)
-                    )
+            val navController = rememberNavController()
+            var showSplash by remember { mutableStateOf(true) }
+
+            if (showSplash) {
+                SplashScreen {
+                    showSplash = false
+                }
+            } else {
+                MainScreenWithFloatingMenu(navController) { padding ->
+                    AppNavGraph(navController, padding)
                 }
             }
         }
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    CareFlowTheme {
-        Greeting("Android")
-    }
-}
