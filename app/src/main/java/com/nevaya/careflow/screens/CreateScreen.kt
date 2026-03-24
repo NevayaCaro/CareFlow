@@ -378,10 +378,91 @@ fun CreateScreen(
                         }
                     }
 
+// SHOWERS SELECTION
+                    if (roomsList.isNotEmpty()) {
+                        Card(
+                            shape = RoundedCornerShape(22.dp),
+                            colors = CardDefaults.cardColors(containerColor = GreenPrimary),
+                            modifier = Modifier
+                                .fillMaxWidth(0.9f)
+                                .wrapContentHeight()
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text("Showers", fontSize = 18.sp, color = TextPrimary)
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    roomsList.chunked(3).forEach { rowRooms ->
+                                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            rowRooms.forEach { room ->
+                                                val isSelected = showersText.text.split(", ")
+                                                    .mapNotNull { it.toIntOrNull() }
+                                                    .contains(room)
 
-                    EditableCard("Showers", showersText) { showersText = it }
-                    EditableCard("Meals", mealsText) { mealsText = it }
+                                                Button(
+                                                    onClick = {
+                                                        val current = showersText.text.split(", ")
+                                                            .mapNotNull { it.toIntOrNull() }.toMutableList()
+                                                        if (isSelected) current.remove(room) else current.add(room)
+                                                        showersText = TextFieldValue(current.sorted().joinToString(", "))
+                                                    },
+                                                    colors = ButtonDefaults.buttonColors(
+                                                        containerColor = if (isSelected) GreenDark else CardBackground
+                                                    ),
+                                                    modifier = Modifier.weight(1f)
+                                                ) {
+                                                    Text(text = room.toString(), color = MaterialTheme.colorScheme.onPrimary)
+                                                }
+                                            }
+                                            repeat(3 - rowRooms.size) { Spacer(modifier = Modifier.weight(1f)) }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
 
+// MEALS SELECTION
+                    if (roomsList.isNotEmpty()) {
+                        Card(
+                            shape = RoundedCornerShape(22.dp),
+                            colors = CardDefaults.cardColors(containerColor = GreenPrimary),
+                            modifier = Modifier
+                                .fillMaxWidth(0.9f)
+                                .wrapContentHeight()
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text("Meals", fontSize = 18.sp, color = TextPrimary)
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    roomsList.chunked(3).forEach { rowRooms ->
+                                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            rowRooms.forEach { room ->
+                                                val isSelected = mealsText.text.split(", ")
+                                                    .mapNotNull { it.toIntOrNull() }
+                                                    .contains(room)
+
+                                                Button(
+                                                    onClick = {
+                                                        val current = mealsText.text.split(", ")
+                                                            .mapNotNull { it.toIntOrNull() }.toMutableList()
+                                                        if (isSelected) current.remove(room) else current.add(room)
+                                                        mealsText = TextFieldValue(current.sorted().joinToString(", "))
+                                                    },
+                                                    colors = ButtonDefaults.buttonColors(
+                                                        containerColor = if (isSelected) GreenDark else CardBackground
+                                                    ),
+                                                    modifier = Modifier.weight(1f)
+                                                ) {
+                                                    Text(text = room.toString(), color = MaterialTheme.colorScheme.onPrimary)
+                                                }
+                                            }
+                                            repeat(3 - rowRooms.size) { Spacer(modifier = Modifier.weight(1f)) }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
 
 
                     Spacer(modifier = Modifier.height(24.dp))
