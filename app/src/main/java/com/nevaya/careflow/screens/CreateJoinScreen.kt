@@ -43,7 +43,7 @@ fun CreateJoinScreen(
             Spacer(modifier = Modifier.height(40.dp))
 
             Text(
-                text = "🧡",
+                text = "CareFlow",
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
             //logo centered at top of screen

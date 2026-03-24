@@ -16,7 +16,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            CareFlowTheme { // 👈 THIS APPLIES YOUR WHOLE STYLE
+            CareFlowTheme {
 
                 val navController = rememberNavController()
 
