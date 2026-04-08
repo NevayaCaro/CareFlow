@@ -30,15 +30,18 @@ fun MessagesScreen(padding: PaddingValues) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text("Nurse Admin: Patient in Room 204 needs attention",
-            color = MaterialTheme.colorScheme.onBackground)
+        Text(
+            "Nurse Admin: Patient in Room 204 needs attention",
+            color = MaterialTheme.colorScheme.onBackground
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text("Supervisor: Shift change updated",
-            color = MaterialTheme.colorScheme.onBackground)
+        Text(
+            "Supervisor: Shift change updated",
+            color = MaterialTheme.colorScheme.onBackground
+        )
     }
 }
-
 
 

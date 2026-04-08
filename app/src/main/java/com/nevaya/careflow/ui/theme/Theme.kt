@@ -7,17 +7,17 @@ import androidx.compose.ui.graphics.Color
 
 // Light theme color scheme
 private val LightColorScheme = lightColorScheme(
-    primary = GreenPrimary,
-    onPrimary = Color.White,
+    primary = GreenPrimary,    // Primary button color
+    onPrimary = Color.White,    // Text on primary button
 
-    secondary = GreenDark,
-    onSecondary = Color.White,
+    secondary = GreenDark,     // Back button color
+    onSecondary = Color.White,  // Text on back button
 
-    background = AppBackground,
-    onBackground = TextPrimary,
+    background = AppBackground, // App background
+    onBackground = TextPrimary, // Text color on background
 
-    surface = CardBackground,
-    onSurface = TextPrimary
+    surface = CardBackground,   // Cards or surfaces
+    onSurface = TextPrimary     // Text color on cards
 )
 
 @Composable
