@@ -21,6 +21,7 @@ import androidx.compose.ui.text.input.KeyboardType
 // Nurse assignment data
 data class NurseAssignment(
     var name: String,
+    var role: String,
     var rooms: String,
     var showers: String,
     var meals: String
@@ -42,6 +43,8 @@ fun CreateScreen(
     var mealsText by remember { mutableStateOf(TextFieldValue("")) }
     var editIndex by remember { mutableStateOf<Int?>(null) }
     var selectedRooms by remember { mutableStateOf(setOf<Int>()) }
+    var selectedRole by remember { mutableStateOf("CNA") }
+
 
     // Step 3: Rooms
     var firstRoom by remember { mutableStateOf("") }
@@ -53,7 +56,7 @@ fun CreateScreen(
         mutableStateOf(SessionStore.createSession(generatedCode))
     }
     var creatorCode by remember { mutableStateOf(TextFieldValue("")) }
-    var activeRoomField by remember { mutableStateOf(1) } // 1 = first, 2 = last
+    var activeRoomField by remember { mutableStateOf(1) }
 
     Box(
         modifier = modifier
@@ -445,10 +448,41 @@ fun CreateScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
-
-
+                    //name input and role
                     EditableCard("Nurse/CNA Name", nurseName) { nurseName = it }
 
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = GreenPrimary),
+                        modifier = Modifier.fillMaxWidth(0.9f)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+
+                            Text("Role", fontSize = 18.sp, color = TextPrimary)
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+
+                                val roles = listOf("CNA", "LPN", "RN")
+
+                                roles.forEach { role ->
+
+                                    Button(
+                                        onClick = { selectedRole = role },
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = if (selectedRole == role) GreenDark else CardBackground
+                                        ),
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Text(role, color = MaterialTheme.colorScheme.onPrimary)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    //ROOMS SElected
                     if (roomsList.isNotEmpty()) {
 
                         Card(
@@ -596,6 +630,7 @@ fun CreateScreen(
                         onClick = {
                             val newAssignment = NurseAssignment(
                                 name = nurseName.text,
+                                role = selectedRole,
                                 rooms = selectedRooms.sorted().joinToString(", "),
                                 showers = showersText.text,
                                 meals = mealsText.text
