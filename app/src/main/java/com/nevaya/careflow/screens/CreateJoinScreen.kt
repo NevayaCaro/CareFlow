@@ -124,23 +124,76 @@ fun CreateJoinScreen(
                     if (showJoinField) {
 //show join code input
                         Spacer(modifier = Modifier.height(24.dp))
+                           //label
+                        Text(
+                            text = "Enter Code",
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
 
-                        OutlinedTextField(
-                            value = joinCode,
-                            onValueChange = {
-                                if (it.all { char -> char.isDigit() } && it.length <= 4) {
-                                    joinCode = it
-                                    errorMessage = ""
-                                } else {
-                                    errorMessage = "Numbers only (4 digits)"
+                        Spacer(modifier = Modifier.height(16.dp))
+                        //pin display
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            repeat(4) { index ->
+                                Text(
+                                    text = if (index < joinCode.length) "●" else "○",
+                                    modifier = Modifier.padding(8.dp)
+                                )
+                            }
+                        }
+                         //number pad
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+
+                            val buttons = listOf(
+                                listOf("1", "2", "3"),
+                                listOf("4", "5", "6"),
+                                listOf("7", "8", "9"),
+                                listOf("DEL", "0", "ENT")
+                            )
+
+                            buttons.forEach { row ->
+                                Row {
+                                    row.forEach { label ->
+
+                                        Button(
+                                            onClick = {
+                                                when (label) {
+
+                                                    "DEL" -> {
+                                                        if (joinCode.isNotEmpty()) {
+                                                            joinCode = joinCode.dropLast(1)
+                                                        }
+                                                    }
+
+                                                    "ENT" -> {
+                                                        if (joinCode.length == 4) {
+                                                            onCreateClick()
+                                                        } else {
+                                                            errorMessage = "Enter 4-digit code"
+                                                        }
+                                                    }
+
+                                                    else -> {
+                                                        if (joinCode.length < 4) {
+                                                            joinCode += label
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            modifier = Modifier
+                                                .padding(6.dp)
+                                                .size(70.dp)
+                                        ) {
+                                            Text(label)
+                                        }
+                                    }
                                 }
-                            },//update join code if only input is digits
-                            label = { Text("Enter Code") },
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Number
-                            ),//gives numeric keyboard
-                            singleLine = true
-                        )//limits input into a single line
+                            }
+                        }
 
                         if (errorMessage.isNotEmpty()) {
                             Spacer(modifier = Modifier.height(6.dp))

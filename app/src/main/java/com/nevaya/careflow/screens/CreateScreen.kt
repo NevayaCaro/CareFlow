@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,6 +16,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.nevaya.careflow.ui.theme.*
 import com.nevaya.careflow.data.SessionStore
+import androidx.compose.ui.text.input.KeyboardType
 
 // Nurse assignment data
 data class NurseAssignment(
@@ -42,8 +44,8 @@ fun CreateScreen(
     var selectedRooms by remember { mutableStateOf(setOf<Int>()) }
 
     // Step 3: Rooms
-    var firstRoom by remember { mutableStateOf(TextFieldValue("")) }
-    var lastRoom by remember { mutableStateOf(TextFieldValue("")) }
+    var firstRoom by remember { mutableStateOf("") }
+    var lastRoom by remember { mutableStateOf("") }
     var roomsList by remember { mutableStateOf(listOf<Int>()) }
 
     val generatedCode = remember { (1000..9999).random().toString() }
@@ -51,6 +53,7 @@ fun CreateScreen(
         mutableStateOf(SessionStore.createSession(generatedCode))
     }
     var creatorCode by remember { mutableStateOf(TextFieldValue("")) }
+    var activeRoomField by remember { mutableStateOf(1) } // 1 = first, 2 = last
 
     Box(
         modifier = modifier
@@ -298,23 +301,76 @@ fun CreateScreen(
                             // FIRST ROOM
                             OutlinedTextField(
                                 value = firstRoom,
-                                onValueChange = { newValue ->
-                                    if (newValue.text.all { c -> c.isDigit() }) firstRoom = newValue
-                                },
+                                onValueChange = {},
+                                readOnly = true,
                                 label = { Text("First Room Number", color = TextPrimary) },
                                 singleLine = true,
-                                modifier = Modifier.fillMaxWidth()
-
-                            ) // LAST ROOM
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = OutlinedTextFieldDefaults.colors()
+                            )
+                            // LAST ROOM
                             OutlinedTextField(
                                 value = lastRoom,
-                                onValueChange = { newValue ->
-                                    if (newValue.text.all { c -> c.isDigit() }) lastRoom = newValue
-                                },
+                                onValueChange = {},
+                                readOnly = true,
                                 label = { Text("Last Room Number", color = TextPrimary) },
                                 singleLine = true,
                                 modifier = Modifier.fillMaxWidth()
                             )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+
+                        Text(
+                            text = if (activeRoomField == 1) "Entering First Room" else "Entering Last Room",
+                            color = TextPrimary
+                        )
+
+                        val buttons = listOf(
+                            listOf("1", "2", "3"),
+                            listOf("4", "5", "6"),
+                            listOf("7", "8", "9"),
+                            listOf("DEL", "0", "NEXT")
+                        )
+
+                        buttons.forEach { row ->
+                            Row {
+                                row.forEach { label ->
+
+                                    Button(
+                                        onClick = {
+
+                                            val current = if (activeRoomField == 1) firstRoom else lastRoom
+
+                                            when (label) {
+
+                                                "DEL" -> {
+                                                    val updated = current.dropLast(1)
+                                                    if (activeRoomField == 1) firstRoom = updated else lastRoom = updated
+                                                }
+
+                                                "NEXT" -> {
+                                                    activeRoomField = if (activeRoomField == 1) 2 else 1
+                                                }
+
+                                                else -> {
+                                                    if (current.length < 4) {
+                                                        val updated = current + label
+                                                        if (activeRoomField == 1) firstRoom = updated else lastRoom = updated
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        modifier = Modifier
+                                            .padding(6.dp)
+                                            .size(70.dp)
+                                    ) {
+                                        Text(label)
+                                    }
+                                }
+                            }
                         }
                     }
 
@@ -335,9 +391,10 @@ fun CreateScreen(
                             // DELETE BUTTON
                             Button(
                                 onClick = {
-                                    firstRoom = TextFieldValue("")
-                                    lastRoom = TextFieldValue("")
+                                    firstRoom = ""
+                                    lastRoom = ""
                                     roomsList = emptyList()
+                                    activeRoomField = 1
                                 },
                                 colors = ButtonDefaults.buttonColors(containerColor = GreenDark),
                                 modifier = Modifier.weight(1f)
@@ -350,11 +407,14 @@ fun CreateScreen(
                             // DONE BUTTON
                             Button(
                                 onClick = {
-                                    val start = firstRoom.text.toIntOrNull()
-                                    val end = lastRoom.text.toIntOrNull()
+                                    val start = firstRoom.toIntOrNull()
+                                    val end = lastRoom.toIntOrNull()
+
                                     roomsList = if (start != null && end != null && end >= start) {
                                         (start..end).toList()
-                                    } else emptyList()
+                                    } else {
+                                        emptyList()
+                                    }
 
                                     session.value.rooms = roomsList
                                     currentStep = 1
@@ -369,7 +429,7 @@ fun CreateScreen(
 
                     // Show current rooms for debug
                     if (roomsList.isNotEmpty()) {
-                        Text("Rooms: ${roomsList.joinToString(", ")}", color = TextPrimary)
+                        Text("Generated rooms: ${roomsList.joinToString(", ")}")
                     }
                 }
             }
