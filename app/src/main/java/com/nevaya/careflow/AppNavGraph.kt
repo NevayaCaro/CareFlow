@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.nevaya.careflow.SplashScreen
 import com.nevaya.careflow.ui.screens.*
+import com.nevaya.careflow.ui.theme.CareFlowTheme
 
 @Composable
 fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {

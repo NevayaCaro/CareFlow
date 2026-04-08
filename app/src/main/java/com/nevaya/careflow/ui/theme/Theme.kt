@@ -8,10 +8,10 @@ import androidx.compose.ui.graphics.Color
 // Light theme color scheme
 private val LightColorScheme = lightColorScheme(
     primary = GreenPrimary,
-    onPrimary = Color.White,
+    onPrimary = Color.Green,
 
     secondary = GreenDark,
-    onSecondary = Color.White,
+    onSecondary = Color.Gray,
 
     background = AppBackground,
     onBackground = TextPrimary,
