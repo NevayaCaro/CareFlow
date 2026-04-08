@@ -3,29 +3,59 @@ package com.nevaya.careflow
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.ui.Modifier
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.nevaya.careflow.navigation.AppNavGraph
-import com.nevaya.careflow.ui.components.MainScreenWithFloatingMenu
+import com.nevaya.careflow.screens.CreateJoinScreen
+import com.nevaya.careflow.screens.CreateScreen
+import com.nevaya.careflow.ui.theme.CareFlowTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            val navController = rememberNavController()
-            var showSplash by remember { mutableStateOf(true) }
 
-            if (showSplash) {
-                SplashScreen {
-                    showSplash = false
-                }
-            } else {
-                MainScreenWithFloatingMenu(navController) { padding ->
-                    AppNavGraph(navController, padding)
+        setContent {
+            CareFlowTheme {
+
+                val navController = rememberNavController()
+
+                Scaffold(
+                    modifier = Modifier.fillMaxSize()
+                ) { innerPadding ->
+
+                    NavHost(
+                        navController = navController,
+                        startDestination = "createJoin",
+                        modifier = Modifier.padding(innerPadding)
+                    ) {
+
+                        // join screen
+                        composable("createJoin") {
+                            CreateJoinScreen(
+                                onCreateClick = {
+                                    navController.navigate("create")
+                                }
+                            )
+                        }
+
+                        // create screen
+                        composable("create") {
+                            CreateScreen(
+                                onDoneClick = {
+                                    navController.navigate("createJoin")
+                                },
+                                onBackClick = {
+                                    navController.popBackStack()
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }
     }
 }
-
-
