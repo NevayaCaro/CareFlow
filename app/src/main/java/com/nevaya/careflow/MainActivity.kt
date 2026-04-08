@@ -42,10 +42,14 @@ class MainActivity : ComponentActivity() {
                         // SECOND SCREEN
                         composable("create") {
                             CreateScreen(
+                                onDoneClick = {
+                                    navController.navigate("createJoin")
+                                },
                                 onBackClick = {
                                     navController.popBackStack()
                                 }
                             )
+
                         }
                     }
                 }

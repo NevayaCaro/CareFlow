@@ -9,12 +9,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.nevaya.careflow.ui.theme.*
+import com.nevaya.careflow.data.SessionStore
 
 // Nurse assignment data
 data class NurseAssignment(
@@ -22,11 +22,13 @@ data class NurseAssignment(
     var rooms: String,
     var showers: String,
     var meals: String
+
 )
 
 @Composable
 fun CreateScreen(
     modifier: Modifier = Modifier,
+    onDoneClick: () -> Unit,
     onBackClick: () -> Unit
 ) {
     var currentStep by remember { mutableStateOf(1) }
@@ -34,7 +36,6 @@ fun CreateScreen(
 
     // Step 2 fields
     var nurseName by remember { mutableStateOf(TextFieldValue("")) }
-    var roomsText by remember { mutableStateOf(TextFieldValue("")) }
     var showersText by remember { mutableStateOf(TextFieldValue("")) }
     var mealsText by remember { mutableStateOf(TextFieldValue("")) }
     var editIndex by remember { mutableStateOf<Int?>(null) }
@@ -46,6 +47,10 @@ fun CreateScreen(
     var roomsList by remember { mutableStateOf(listOf<Int>()) }
 
     val generatedCode = remember { (1000..9999).random().toString() }
+    val session = remember(generatedCode) {
+        mutableStateOf(SessionStore.createSession(generatedCode))
+    }
+    var creatorCode by remember { mutableStateOf(TextFieldValue("")) }
 
     Box(
         modifier = modifier
@@ -91,7 +96,45 @@ fun CreateScreen(
                     verticalArrangement = Arrangement.spacedBy(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    //creator code maker
+                    Card(
+                        shape = RoundedCornerShape(22.dp),
+                        colors = CardDefaults.cardColors(containerColor = GreenPrimary),
+                        modifier = Modifier
+                            .width(320.dp)
+                            .align(Alignment.CenterHorizontally)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
 
+                            Text(
+                                text = "Creator Access Code",
+                                fontSize = 18.sp,
+                                color = TextPrimary
+                            )
+
+                            OutlinedTextField(
+                                value = creatorCode,
+                                onValueChange = {
+                                    if (it.text.length <= 4 && it.text.all { c -> c.isDigit() }) {
+                                        creatorCode = it
+                                    }
+                                },
+                                label = { Text("Enter 4-digit code") },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+
+                            Text(
+                                text = "Make a code to gain access to this created screen when you return from join. Workers use the top-right code to enter worker view, while this code is for creator access only.",
+                                fontSize = 12.sp,
+                                color = TextPrimary
+                            )
+                        }
+                    }
                     // CARD BEHIND BUTTONS
                     Card(
                         shape = RoundedCornerShape(22.dp),
@@ -129,7 +172,6 @@ fun CreateScreen(
                             Button(
                                 onClick = {
                                     nurseName = TextFieldValue("")
-                                    roomsText = TextFieldValue("")
                                     showersText = TextFieldValue("")
                                     mealsText = TextFieldValue("")
                                     editIndex = null
@@ -178,7 +220,6 @@ fun CreateScreen(
                                     Button(
                                         onClick = {
                                             nurseName = TextFieldValue(assignment.name)
-                                            roomsText = TextFieldValue(assignment.rooms)
                                             showersText = TextFieldValue(assignment.showers)
                                             mealsText = TextFieldValue(assignment.meals)
                                             editIndex = index
@@ -207,6 +248,28 @@ fun CreateScreen(
                                 }
                             }
                         }
+                    }
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Button(
+                        onClick = {
+                            //keeps both codes and adds session data
+
+                            session.value.creatorCode = creatorCode.text
+                            session.value.workerCode = session.value.code
+
+                            // navigates to join code
+                            onDoneClick()
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = GreenDark,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth(0.9f)
+                            .height(60.dp)
+                    ) {
+                        Text("Done")
                     }
                 }
             }
@@ -292,6 +355,8 @@ fun CreateScreen(
                                     roomsList = if (start != null && end != null && end >= start) {
                                         (start..end).toList()
                                     } else emptyList()
+
+                                    session.value.rooms = roomsList
                                     currentStep = 1
                                 },
                                 colors = ButtonDefaults.buttonColors(containerColor = GreenDark),

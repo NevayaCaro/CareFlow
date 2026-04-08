@@ -128,11 +128,11 @@ fun CreateJoinScreen(
                         OutlinedTextField(
                             value = joinCode,
                             onValueChange = {
-                                if (it.all { char -> char.isDigit() } && it.length <= 6) {
+                                if (it.all { char -> char.isDigit() } && it.length <= 4) {
                                     joinCode = it
                                     errorMessage = ""
                                 } else {
-                                    errorMessage = "Numbers only (4-6 digits)"
+                                    errorMessage = "Numbers only (4 digits)"
                                 }
                             },//update join code if only input is digits
                             label = { Text("Enter Code") },
