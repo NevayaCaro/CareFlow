@@ -6,7 +6,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.nevaya.careflow.ui.theme.CareFlowTheme
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,8 +35,8 @@ fun HomeScreen(
             onClick = onViewSchedule,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
+                containerColor = MaterialTheme.colorScheme.secondary,     // DARK GREEN
+                contentColor = MaterialTheme.colorScheme.onSecondary      // TEXT ON DARK GREEN
             )
         ) {
             Text("View Schedule")
@@ -48,12 +48,11 @@ fun HomeScreen(
             onClick = onViewAssignments,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
+                containerColor = MaterialTheme.colorScheme.secondary,     // DARK GREEN
+                contentColor = MaterialTheme.colorScheme.onSecondary
             )
         ) {
             Text("Room Assignments")
         }
     }
 }
-

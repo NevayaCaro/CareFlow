@@ -6,7 +6,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.nevaya.careflow.ui.theme.CareFlowTheme
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -21,18 +21,60 @@ fun ScheduleScreen(padding: PaddingValues) {
             .background(MaterialTheme.colorScheme.background)
     ) {
 
+        // HEADER
         Text(
             "Your Upcoming Shifts",
             style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onBackground
+            color = MaterialTheme.colorScheme.secondary   // DARK GREEN
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
-        Text("March 18 • 7:00 AM - 3:00 PM", color = MaterialTheme.colorScheme.onBackground)
-        Text("March 19 • 3:00 PM - 11:00 PM", color = MaterialTheme.colorScheme.onBackground)
-        Text("March 21 • 7:00 AM - 3:00 PM", color = MaterialTheme.colorScheme.onBackground)
+        // SHIFT 1
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
+        ) {
+            Text(
+                "March 18 • 7:00 AM – 3:00 PM",
+                modifier = Modifier.padding(16.dp),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // SHIFT 2
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
+        ) {
+            Text(
+                "March 19 • 3:00 PM – 11:00 PM",
+                modifier = Modifier.padding(16.dp),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // SHIFT 3
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
+        ) {
+            Text(
+                "March 21 • 7:00 AM – 3:00 PM",
+                modifier = Modifier.padding(16.dp),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
     }
 }
-
 

@@ -10,9 +10,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.nevaya.careflow.ui.theme.CareFlowTheme
+
 
 @Composable
 fun ProfileScreen(
@@ -53,7 +54,7 @@ fun ProfileScreen(
                             imageVector = Icons.Default.Person,
                             contentDescription = "Profile Picture",
                             modifier = Modifier.size(40.dp),
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MaterialTheme.colorScheme.secondary   // DARK GREEN
                         )
                     }
 
@@ -77,7 +78,7 @@ fun ProfileScreen(
                     Icon(
                         Icons.Default.Edit,
                         contentDescription = "Edit Profile",
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = MaterialTheme.colorScheme.secondary   // DARK GREEN
                     )
                 }
             }
@@ -107,7 +108,7 @@ fun ProfileScreen(
                         Text(
                             if (isClockedIn) "On Duty" else "Off Duty",
                             fontSize = 18.sp,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.secondary   // DARK GREEN
                         )
                     }
 
@@ -129,7 +130,7 @@ fun ProfileScreen(
 
             HorizontalDivider(
                 modifier = Modifier.padding(vertical = 8.dp),
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)   // DARK GREEN
             )
 
             // PERSONAL INFO
@@ -149,7 +150,7 @@ fun ProfileScreen(
 
             HorizontalDivider(
                 modifier = Modifier.padding(vertical = 8.dp),
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)   // DARK GREEN
             )
 
             // WORK INFO
@@ -197,8 +198,8 @@ fun ProfileScreen(
                         onClick = onViewSchedule,
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
+                            containerColor = MaterialTheme.colorScheme.secondary,   // DARK GREEN
+                            contentColor = MaterialTheme.colorScheme.onSecondary
                         )
                     ) {
                         Text("View Full Schedule")
@@ -215,12 +216,10 @@ fun ProfileScreen(
                         OutlinedButton(
                             onClick = { isClockedIn = !isClockedIn },
                             colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = MaterialTheme.colorScheme.primary
+                                contentColor = MaterialTheme.colorScheme.secondary   // DARK GREEN
                             ),
                             border = ButtonDefaults.outlinedButtonBorder.copy(
-                                brush = androidx.compose.ui.graphics.SolidColor(
-                                    MaterialTheme.colorScheme.primary
-                                )
+                                brush = SolidColor(MaterialTheme.colorScheme.secondary)
                             )
                         ) {
                             Text(if (isClockedIn) "Clock Out" else "Clock In")
@@ -229,12 +228,10 @@ fun ProfileScreen(
                         OutlinedButton(
                             onClick = onViewAssignments,
                             colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = MaterialTheme.colorScheme.primary
+                                contentColor = MaterialTheme.colorScheme.secondary   // DARK GREEN
                             ),
                             border = ButtonDefaults.outlinedButtonBorder.copy(
-                                brush = androidx.compose.ui.graphics.SolidColor(
-                                    MaterialTheme.colorScheme.primary
-                                )
+                                brush = SolidColor(MaterialTheme.colorScheme.secondary)
                             )
                         ) {
                             Text("Assignments")
@@ -264,7 +261,3 @@ fun ProfileInfoRow(label: String, value: String) {
         )
     }
 }
-
-
-
-

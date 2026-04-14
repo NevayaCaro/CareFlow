@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
-import com.nevaya.careflow.ui.theme.CareFlowTheme
+
 
 
 
@@ -58,20 +58,19 @@ fun MainScreenWithFloatingMenu(
                     IconButton(
                         onClick = { menuExpanded = true },
                         colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
+                            containerColor = MaterialTheme.colorScheme.secondary,   // DARK GREEN
+                            contentColor = MaterialTheme.colorScheme.onSecondary    // TEXT/ICON ON DARK GREEN
                         )
                     ) {
                         Icon(Icons.Default.Menu, contentDescription = "Menu")
                     }
 
-                    // GREEN DROPDOWN MENU
                     DropdownMenu(
                         expanded = menuExpanded,
                         onDismissRequest = { menuExpanded = false },
                         modifier = Modifier
                             .background(MaterialTheme.colorScheme.surface)
-                    ) {
+                    ){
 
                         FloatingMenuItem("Home", Icons.Default.Home) {
                             navController.navigate("home")
@@ -125,7 +124,7 @@ fun FloatingMenuItem(
             Icon(
                 icon,
                 contentDescription = title,
-                tint = MaterialTheme.colorScheme.primary
+                tint = MaterialTheme.colorScheme.secondary   // DARK GREEN ICONS
             )
         },
         onClick = onClick
