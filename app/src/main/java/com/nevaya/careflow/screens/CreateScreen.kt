@@ -682,11 +682,14 @@ fun EditableCard(label: String, value: TextFieldValue, onValueChange: (TextField
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = 50.dp),
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = AppBackground,
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = AppBackground,
+                    unfocusedContainerColor = AppBackground,
                     focusedIndicatorColor = GreenDark,
-                    unfocusedIndicatorColor = GreenDark
+                    unfocusedIndicatorColor = GreenDark,
+                    cursorColor = GreenDark
                 )
+
             )
         }
     }

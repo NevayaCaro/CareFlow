@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+
 android {
     namespace = "com.nevaya.careflow"
     compileSdk = 36
@@ -27,17 +28,25 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
+
+    // ⭐ NEW RECOMMENDED BLOCK
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        }
     }
+
     buildFeatures {
         compose = true
     }
 }
+
+fun compilerOptions(function: () -> Unit) {}
 
 dependencies {
 
