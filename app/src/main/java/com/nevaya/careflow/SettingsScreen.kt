@@ -65,4 +65,3 @@ fun SettingsScreen(padding: PaddingValues) {
         }
     }
 }
-

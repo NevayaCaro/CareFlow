@@ -20,26 +20,58 @@ fun MessagesScreen(padding: PaddingValues) {
             .background(MaterialTheme.colorScheme.background)
     ) {
 
+        // HEADER
         Text(
             "Team Messages",
             style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onBackground
+            color = MaterialTheme.colorScheme.secondary   // DARK GREEN
         )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // MESSAGE 1
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    "Nurse Admin",
+                    color = MaterialTheme.colorScheme.secondary,   // DARK GREEN
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    "Patient in Room 204 needs attention",
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            "Nurse Admin: Patient in Room 204 needs attention",
-            color = MaterialTheme.colorScheme.onBackground
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            "Supervisor: Shift change updated",
-            color = MaterialTheme.colorScheme.onBackground
-        )
+        // MESSAGE 2
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    "Supervisor",
+                    color = MaterialTheme.colorScheme.secondary,   // DARK GREEN
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    "Shift change updated",
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
     }
 }
-
 

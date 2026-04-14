@@ -77,4 +77,3 @@ fun ScheduleScreen(padding: PaddingValues) {
         }
     }
 }
-

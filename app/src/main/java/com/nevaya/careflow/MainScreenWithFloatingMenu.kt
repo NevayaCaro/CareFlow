@@ -54,7 +54,6 @@ fun MainScreenWithFloatingMenu(
                         .align(Alignment.TopStart)
                 ) {
 
-                    // GREEN MENU BUTTON
                     IconButton(
                         onClick = { menuExpanded = true },
                         colors = IconButtonDefaults.iconButtonColors(

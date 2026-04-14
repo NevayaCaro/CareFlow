@@ -77,6 +77,5 @@ fun RoomAssignmentsScreen(padding: PaddingValues) {
             )
         }
     }
+
 }
-
-
