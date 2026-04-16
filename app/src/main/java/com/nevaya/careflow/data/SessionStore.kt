@@ -2,16 +2,6 @@ package com.nevaya.careflow.data
 
 import com.nevaya.careflow.data.NurseAssignment
 
-
-// This is your data container (what gets saved per code)
-data class Session(
-    var code: String,
-    var workerCode: String = "",
-    var creatorCode: String = "",
-    var rooms: List<Int> = emptyList(),
-    var assignments: List<NurseAssignment> = emptyList()
-)
-
 // This is in-memory "database"
 object SessionStore {
 
