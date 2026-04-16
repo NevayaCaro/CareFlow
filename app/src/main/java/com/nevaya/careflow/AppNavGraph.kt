@@ -8,7 +8,6 @@ import androidx.navigation.compose.composable
 import com.nevaya.careflow.SplashScreen
 import com.nevaya.careflow.ui.screens.*
 
-
 @Composable
 fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
 
@@ -67,36 +66,60 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
         // PROFILE
         composable("profile") {
             ProfileScreen(
-                onEditProfile = {},
+                onEditProfile = { navController.navigate("edit_profile") },
                 onViewSchedule = { navController.navigate("schedule") },
                 onViewAssignments = { navController.navigate("assignments") }
             )
         }
 
-        // HOME (updated)
+        // HOME
         composable("home") {
             HomeScreen(padding)
         }
 
-        // SCHEDULE (updated)
+        // SCHEDULE
         composable("schedule") {
             ScheduleScreen(padding)
         }
 
-        // ASSIGNMENTS (updated)
+        // ASSIGNMENTS
         composable("assignments") {
             RoomAssignmentsScreen(padding)
         }
 
-        // MESSAGES (updated)
+        // MESSAGES
         composable("messages") {
-            MessagesScreen(padding)
+            MessagesScreen(navController, padding)
         }
 
-        // SETTINGS (updated)
-        composable("settings") {
-            SettingsScreen(padding)
+        // CHAT SCREEN (NEW)
+        composable("chat/{id}") { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id") ?: ""
+            ChatScreen(navController, id)
         }
+
+        // SETTINGS
+        composable("settings") {
+            SettingsScreen(navController, padding)
+        }
+
+        // -----------------------------
+        // SETTINGS SUB-SCREENS
+        // -----------------------------
+
+        // ACCOUNT
+        composable("edit_profile") { EditProfileScreen(navController) }
+        composable("change_password") { ChangePasswordScreen(navController) }
+        composable("two_factor") { TwoFactorAuthScreen(navController) }
+
+        // DATA & PRIVACY
+        composable("download_data") { DownloadMyDataScreen(navController) }
+        composable("clear_cache") { ClearCacheScreen(navController) }
+        composable("delete_account") { DeleteAccountScreen(navController) }
+
+        // SUPPORT
+        composable("contact_support") { ContactSupportScreen(navController) }
+        composable("report_issue") { ReportIssueScreen(navController) }
     }
 }
 

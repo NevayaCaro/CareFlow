@@ -1,6 +1,7 @@
 package com.nevaya.careflow.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
@@ -8,14 +9,11 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
-
-
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,10 +34,11 @@ fun MainScreenWithFloatingMenu(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(padding)   // ⭐ FIX: pass real Scaffold padding
         ) {
 
-            content(PaddingValues())
+            // ⭐ FIX: pass the real padding to the screen content
+            content(padding)
 
             // Floating menu layer
             Box(
@@ -57,8 +56,8 @@ fun MainScreenWithFloatingMenu(
                     IconButton(
                         onClick = { menuExpanded = true },
                         colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary,   // DARK GREEN
-                            contentColor = MaterialTheme.colorScheme.onSecondary    // TEXT/ICON ON DARK GREEN
+                            containerColor = MaterialTheme.colorScheme.secondary,
+                            contentColor = MaterialTheme.colorScheme.onSecondary
                         )
                     ) {
                         Icon(Icons.Default.Menu, contentDescription = "Menu")
@@ -69,7 +68,7 @@ fun MainScreenWithFloatingMenu(
                         onDismissRequest = { menuExpanded = false },
                         modifier = Modifier
                             .background(MaterialTheme.colorScheme.surface)
-                    ){
+                    ) {
 
                         FloatingMenuItem("Home", Icons.Default.Home) {
                             navController.navigate("home")
@@ -123,10 +122,10 @@ fun FloatingMenuItem(
             Icon(
                 icon,
                 contentDescription = title,
-                tint = MaterialTheme.colorScheme.secondary   // DARK GREEN ICONS
+                tint = MaterialTheme.colorScheme.secondary
             )
         },
         onClick = onClick
+        
     )
 }
-
