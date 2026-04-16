@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,17 +15,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.nevaya.careflow.ui.theme.*
 import com.nevaya.careflow.data.SessionStore
-import androidx.compose.ui.text.input.KeyboardType
+import com.nevaya.careflow.data.NurseAssignment
 
-// Nurse assignment data
-data class NurseAssignment(
-    var name: String,
-    var role: String,
-    var rooms: String,
-    var showers: String,
-    var meals: String
 
-)
 
 @Composable
 fun CreateScreen(
@@ -44,6 +35,7 @@ fun CreateScreen(
     var editIndex by remember { mutableStateOf<Int?>(null) }
     var selectedRooms by remember { mutableStateOf(setOf<Int>()) }
     var selectedRole by remember { mutableStateOf("CNA") }
+    var errorMessage by remember { mutableStateOf("") }
 
 
     // Step 3: Rooms
@@ -57,6 +49,7 @@ fun CreateScreen(
     }
     var creatorCode by remember { mutableStateOf(TextFieldValue("")) }
     var activeRoomField by remember { mutableStateOf(1) }
+
 
     Box(
         modifier = modifier
@@ -628,6 +621,12 @@ fun CreateScreen(
 
                     Button(
                         onClick = {
+
+                            val session = SessionStore.getSession(generatedCode) ?: run {
+                                errorMessage = "Session missing"
+                                return@Button
+                            }
+
                             val newAssignment = NurseAssignment(
                                 name = nurseName.text,
                                 role = selectedRole,
@@ -636,13 +635,17 @@ fun CreateScreen(
                                 meals = mealsText.text
                             )
 
-                            if (editIndex != null) {
-                                assignments = assignments.toMutableList().also {
-                                    it[editIndex!!] = newAssignment
+                            val updatedAssignments =
+                                if (editIndex != null) {
+                                    assignments.toMutableList().also {
+                                        it[editIndex!!] = newAssignment
+                                    }
+                                } else {
+                                    assignments + newAssignment
                                 }
-                            } else {
-                                assignments = assignments + newAssignment
-                            }
+
+                            session.assignments = updatedAssignments
+                            assignments = updatedAssignments
 
                             currentStep = 1
                         },

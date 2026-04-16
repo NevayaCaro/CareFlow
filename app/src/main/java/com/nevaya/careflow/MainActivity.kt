@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.*
 import com.nevaya.careflow.screens.CreateJoinScreen
 import com.nevaya.careflow.screens.CreateScreen
+import com.nevaya.careflow.screens.WorkerAssignmentScreen
 import com.nevaya.careflow.ui.theme.CareFlowTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,6 +36,9 @@ class MainActivity : ComponentActivity() {
                             CreateJoinScreen(
                                 onCreateClick = {
                                     navController.navigate("create")
+                                },
+                                onJoinValid = { code ->
+                                    navController.navigate("worker/$code")
                                 }
                             )
                         }
@@ -50,6 +54,12 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
 
+                        }
+
+                        composable("worker/{code}") { backStackEntry ->
+                            val code = backStackEntry.arguments?.getString("code") ?: ""
+
+                            WorkerAssignmentScreen(sessionCode = code)
                         }
                     }
                 }
