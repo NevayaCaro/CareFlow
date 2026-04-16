@@ -10,12 +10,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.nevaya.careflow.data.SessionStore
 import com.nevaya.careflow.data.NurseAssignment
+import com.nevaya.careflow.data.TaskItem
 
 @Composable
 fun WorkerAssignmentScreen(sessionCode: String) {
-
+//gets session code
     val session = SessionStore.getSession(sessionCode)
 
+//if session is missing
     if (session == null) {
         Text("Invalid session code")
         return
@@ -23,7 +25,7 @@ fun WorkerAssignmentScreen(sessionCode: String) {
 
     var selectedName by remember { mutableStateOf<String?>(null) }
 
-    // 🔥 GROUP SAFE (explicit type fixes inference issue)
+    //  assignment by worker name
     val grouped: Map<String, List<NurseAssignment>> =
         session.assignments.groupBy { it.name }
 
@@ -46,7 +48,7 @@ fun WorkerAssignmentScreen(sessionCode: String) {
 
         if (selectedName == null) {
 
-
+//shows list of workers
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
@@ -72,30 +74,42 @@ fun WorkerAssignmentScreen(sessionCode: String) {
 
         } else {
 
-
+//selected worker data and first record
             val assignments = grouped[selectedName].orEmpty()
+            val selectedAssignment = assignments.firstOrNull()
+
+
+            // rooms assigned ONLY to this selected person
+            val assignedRooms = assignments.flatMap {
+                it.rooms.split(",")
+                    .map { it.trim() }
+                    .filter { it.isNotEmpty() }
+                    .mapNotNull { it.toIntOrNull() }
+            }
+
             // ensures missing role doesn't break UI display
             val role = assignments.firstOrNull()?.role?.takeIf { it.isNotBlank() } ?: "Unknown"
 
-            // keeps room values as strings so app never crashes on formatting issues
-            val rooms = assignments.flatMap {
-                it.rooms.split(",")
-                    .map { r -> r.trim() }
-                    .filter { it.isNotEmpty() }
-            }
-            // prevents crashes from bad formatting or empty strings
-            val showers = assignments.flatMap {
-                it.showers.split(",")
-                    .map { it.trim() }
-                    .filter { it.isNotEmpty() }
-            }
-
-            val meals = assignments.flatMap {
-                it.meals.split(",")
-                    .map { it.trim() }
-                    .filter { it.isNotEmpty() }
-            }
-
+            // clean room list for UI
+            val rooms = selectedAssignment?.rooms
+                ?.split(",")
+                ?.map { it.trim() }
+                ?.filter { it.isNotEmpty() }
+                ?: emptyList()
+            //converts shower to taskitem, this makes it able to be "completed"
+            val showerTasks = selectedAssignment?.showers
+                ?.split(",")
+                ?.map { it.trim() }
+                ?.filter { it.isNotEmpty() }
+                ?.map { room -> TaskItem(room.toInt()) }
+                ?: emptyList()
+            //converts meals to a taskitem
+            val mealTasks = selectedAssignment?.meals
+                ?.split(",")
+                ?.map { it.trim() }
+                ?.filter { it.isNotEmpty() }
+                ?.map { room -> TaskItem(room.toInt()) }
+                ?: emptyList()
             Column {
 
                 Button(onClick = { selectedName = null }) {
@@ -119,19 +133,86 @@ fun WorkerAssignmentScreen(sessionCode: String) {
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Text(
-                    "Showers - " +
-                            if (showers.isEmpty()) "None"
-                            else showers.sorted().joinToString(", ")
-                )
+                Text("Showers", style = MaterialTheme.typography.titleMedium)
+
+                showerTasks.forEach { task ->
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+
+                            Column {
+                                Text("Room ${task.room}")
+                                Text(
+                                    if (task.done)
+                                        "Done at ${task.completedAt}"
+                                    else
+                                        "Not completed"
+                                )
+                            }
+
+                            Button(
+                                onClick = {
+                                    task.done = true
+                                    task.completedAt = java.text.SimpleDateFormat("HH:mm MM/dd")
+                                        .format(java.util.Date())
+                                }
+                            ) {
+                                Text("Done")
+                            }
+                        }
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Text(
-                    "Meals - " +
-                            if (meals.isEmpty()) "None"
-                            else meals.sorted().joinToString(", ")
-                )
+                Text("Meals", style = MaterialTheme.typography.titleMedium)
+
+                mealTasks.forEach { task ->
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                    ) {
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+
+                            Column {
+                                Text("Room ${task.room}")
+                                Text(
+                                    if (task.done)
+                                        "Done at ${task.completedAt}"
+                                    else
+                                        "Not completed"
+                                )
+                            }
+
+                            Button(
+                                onClick = {
+                                    task.done = true
+                                    task.completedAt = java.text.SimpleDateFormat("HH:mm MM/dd")
+                                        .format(java.util.Date())
+                                }
+                            ) {
+                                Text("Done")
+                            }
+                        }
+                    }
+                }
             }
         }
     }

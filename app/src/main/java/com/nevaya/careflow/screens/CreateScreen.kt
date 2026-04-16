@@ -16,6 +16,7 @@ import androidx.compose.ui.zIndex
 import com.nevaya.careflow.ui.theme.*
 import com.nevaya.careflow.data.SessionStore
 import com.nevaya.careflow.data.NurseAssignment
+import com.nevaya.careflow.data.TaskItem
 
 
 
@@ -403,6 +404,7 @@ fun CreateScreen(
                             // DONE BUTTON
                             Button(
                                 onClick = {
+
                                     val start = firstRoom.toIntOrNull()
                                     val end = lastRoom.toIntOrNull()
 
@@ -412,7 +414,15 @@ fun CreateScreen(
                                         emptyList()
                                     }
 
-                                    session.value.rooms = roomsList
+                                    val sessionValue = session.value
+
+                                    // store rooms
+                                    sessionValue.rooms = roomsList
+
+                                    // create task lists for tracking
+                                    sessionValue.showerTasks = roomsList.map { TaskItem(it) }
+                                    sessionValue.mealTasks = roomsList.map { TaskItem(it) }
+
                                     currentStep = 1
                                 },
                                 colors = ButtonDefaults.buttonColors(containerColor = GreenDark),
