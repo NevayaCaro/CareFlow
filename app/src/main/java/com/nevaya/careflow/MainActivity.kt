@@ -13,6 +13,8 @@ import com.nevaya.careflow.screens.CreateScreen
 import com.nevaya.careflow.screens.CreatorAssignmentScreen
 import com.nevaya.careflow.screens.WorkerAssignmentScreen
 import com.nevaya.careflow.ui.theme.CareFlowTheme
+
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,7 +68,12 @@ class MainActivity : ComponentActivity() {
                         composable("creator/{code}") { backStackEntry ->
                             val code = backStackEntry.arguments?.getString("code") ?: ""
 
-                            CreatorAssignmentScreen(sessionCode = code)
+                            CreatorAssignmentScreen(
+                                sessionCode = code,
+                                onBack = {
+                                    navController.navigate("createJoin")
+                                }
+                            )
                         }
                     }
                 }

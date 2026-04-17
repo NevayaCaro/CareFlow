@@ -7,13 +7,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.nevaya.careflow.data.SessionStore
-import com.nevaya.careflow.data.NurseAssignment
 
 @Composable
-fun CreatorAssignmentScreen(sessionCode: String) {
+fun CreatorAssignmentScreen(
+    sessionCode: String,
+    onBack: () -> Unit
+) {
 
     val session = SessionStore.getSession(sessionCode)
 
@@ -32,16 +35,34 @@ fun CreatorAssignmentScreen(sessionCode: String) {
             .padding(16.dp)
     ) {
 
-        Text("CREATOR VIEW")
+        //  SMALL TOP LEFT BACK BUTTON
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp)
+        ) {
+            Button(
+                onClick = { onBack() },
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .height(36.dp)
+                    .wrapContentWidth(),
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
+            ) {
+                Text("Back")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text("CREATOR SHIFT VIEW")
         Text("Code: ${session.code}")
 
         Spacer(modifier = Modifier.height(16.dp))
 
         if (selectedName == null) {
 
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
 
                 items(grouped.keys.toList()) { name ->
 
