@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.*
 import com.nevaya.careflow.screens.CreateJoinScreen
 import com.nevaya.careflow.screens.CreateScreen
+import com.nevaya.careflow.screens.CreatorAssignmentScreen
 import com.nevaya.careflow.screens.WorkerAssignmentScreen
 import com.nevaya.careflow.ui.theme.CareFlowTheme
 class MainActivity : ComponentActivity() {
@@ -46,8 +47,8 @@ class MainActivity : ComponentActivity() {
                         // SECOND SCREEN
                         composable("create") {
                             CreateScreen(
-                                onDoneClick = {
-                                    navController.navigate("createJoin")
+                                onDoneClick = { code ->
+                                    navController.navigate("creator/$code")
                                 },
                                 onBackClick = {
                                     navController.popBackStack()
@@ -60,6 +61,12 @@ class MainActivity : ComponentActivity() {
                             val code = backStackEntry.arguments?.getString("code") ?: ""
 
                             WorkerAssignmentScreen(sessionCode = code)
+                        }
+
+                        composable("creator/{code}") { backStackEntry ->
+                            val code = backStackEntry.arguments?.getString("code") ?: ""
+
+                            CreatorAssignmentScreen(sessionCode = code)
                         }
                     }
                 }

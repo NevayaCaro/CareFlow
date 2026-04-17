@@ -23,7 +23,7 @@ import com.nevaya.careflow.data.TaskItem
 @Composable
 fun CreateScreen(
     modifier: Modifier = Modifier,
-    onDoneClick: () -> Unit,
+    onDoneClick: (String) -> Unit,
     onBackClick: () -> Unit
 ) {
     var currentStep by remember { mutableStateOf(1) }
@@ -259,7 +259,7 @@ fun CreateScreen(
                             session.value.workerCode = session.value.code
 
                             // navigates to join code
-                            onDoneClick()
+                            onDoneClick(generatedCode)
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = GreenDark,
