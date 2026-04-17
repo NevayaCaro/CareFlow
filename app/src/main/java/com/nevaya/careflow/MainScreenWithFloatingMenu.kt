@@ -8,14 +8,14 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
-
-
-
+import com.nevaya.careflow.data.UserSessionDataStore
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,6 +23,10 @@ fun MainScreenWithFloatingMenu(
     navController: NavHostController,
     content: @Composable (PaddingValues) -> Unit
 ) {
+    val context = LocalContext.current
+    val session = remember { UserSessionDataStore(context) }
+    val coroutineScope = rememberCoroutineScope()
+
     var menuExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -39,9 +43,8 @@ fun MainScreenWithFloatingMenu(
                 .padding(padding)
         ) {
 
-            content(PaddingValues())
+            content(padding)
 
-            // Floating menu layer
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -57,8 +60,8 @@ fun MainScreenWithFloatingMenu(
                     IconButton(
                         onClick = { menuExpanded = true },
                         colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary,   // DARK GREEN
-                            contentColor = MaterialTheme.colorScheme.onSecondary    // TEXT/ICON ON DARK GREEN
+                            containerColor = MaterialTheme.colorScheme.secondary,
+                            contentColor = MaterialTheme.colorScheme.onSecondary
                         )
                     ) {
                         Icon(Icons.Default.Menu, contentDescription = "Menu")
@@ -69,7 +72,7 @@ fun MainScreenWithFloatingMenu(
                         onDismissRequest = { menuExpanded = false },
                         modifier = Modifier
                             .background(MaterialTheme.colorScheme.surface)
-                    ){
+                    ) {
 
                         FloatingMenuItem("Home", Icons.Default.Home) {
                             navController.navigate("home")
@@ -96,7 +99,12 @@ fun MainScreenWithFloatingMenu(
                             menuExpanded = false
                         }
                         FloatingMenuItem("Logout", Icons.AutoMirrored.Filled.ExitToApp) {
-                            navController.navigate("login")
+                            coroutineScope.launch {
+                                session.clearActiveUser()
+                            }
+                            navController.navigate("login") {
+                                popUpTo(0) { inclusive = true }
+                            }
                             menuExpanded = false
                         }
                     }
@@ -123,10 +131,9 @@ fun FloatingMenuItem(
             Icon(
                 icon,
                 contentDescription = title,
-                tint = MaterialTheme.colorScheme.secondary   // DARK GREEN ICONS
+                tint = MaterialTheme.colorScheme.secondary
             )
         },
         onClick = onClick
     )
 }
-
