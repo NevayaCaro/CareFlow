@@ -35,7 +35,7 @@ fun SettingsScreen(navController: NavHostController, padding: PaddingValues) {
     Column(
         modifier = Modifier
             .padding(padding)
-            .padding(30.dp)
+            .padding(20.dp)
             .fillMaxSize()
             .verticalScroll(scrollState)
             .background(MaterialTheme.colorScheme.background)

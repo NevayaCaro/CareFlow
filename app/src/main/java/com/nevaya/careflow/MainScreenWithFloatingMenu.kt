@@ -1,7 +1,6 @@
 package com.nevaya.careflow.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
@@ -11,9 +10,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
+import com.nevaya.careflow.data.UserSessionDataStore
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -21,6 +23,10 @@ fun MainScreenWithFloatingMenu(
     navController: NavHostController,
     content: @Composable (PaddingValues) -> Unit
 ) {
+    val context = LocalContext.current
+    val session = remember { UserSessionDataStore(context) }
+    val coroutineScope = rememberCoroutineScope()
+
     var menuExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -34,13 +40,11 @@ fun MainScreenWithFloatingMenu(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)   // ⭐ FIX: pass real Scaffold padding
+                .padding(padding)
         ) {
 
-            // ⭐ FIX: pass the real padding to the screen content
             content(padding)
 
-            // Floating menu layer
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -95,7 +99,12 @@ fun MainScreenWithFloatingMenu(
                             menuExpanded = false
                         }
                         FloatingMenuItem("Logout", Icons.AutoMirrored.Filled.ExitToApp) {
-                            navController.navigate("login")
+                            coroutineScope.launch {
+                                session.clearActiveUser()
+                            }
+                            navController.navigate("login") {
+                                popUpTo(0) { inclusive = true }
+                            }
                             menuExpanded = false
                         }
                     }
@@ -126,6 +135,5 @@ fun FloatingMenuItem(
             )
         },
         onClick = onClick
-        
     )
 }

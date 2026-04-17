@@ -13,7 +13,7 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
 
     NavHost(
         navController = navController,
-        startDestination = "settings"
+        startDestination = "home"
     ) {
 
         // SPLASH
@@ -31,7 +31,17 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
         composable("login") {
             LoginScreen(
                 onForgotPassword = { navController.navigate("forgot_password") },
-                onCreateAccount = { navController.navigate("create_account") }
+                onCreateAccount = { navController.navigate("create_account") },
+                onLoginClick = { username ->
+                    navController.navigate("profile") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                },
+                onQuickLogin = { username ->   // ⭐ REQUIRED
+                    navController.navigate("profile") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                }
             )
         }
 

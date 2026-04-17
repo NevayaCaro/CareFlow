@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,22 +15,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 
-// -----------------------------
-// DATA MODELS
-// -----------------------------
 data class Message(
     val text: String,
     val isMe: Boolean
 )
 
-// -----------------------------
-// MAIN CHAT SCREEN
-// -----------------------------
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(navController: NavHostController, conversationId: String) {
 
-    // Temporary sample messages
+    // Sample messages (replace with real data later)
     var messages by remember {
         mutableStateOf(
             listOf(
@@ -66,9 +59,7 @@ fun ChatScreen(navController: NavHostController, conversationId: String) {
                 .fillMaxSize()
         ) {
 
-            // -----------------------------
-            // MESSAGE LIST
-            // -----------------------------
+            // ⭐ SCROLLABLE MESSAGE LIST
             LazyColumn(
                 modifier = Modifier
                     .weight(1f)
@@ -81,9 +72,7 @@ fun ChatScreen(navController: NavHostController, conversationId: String) {
                 }
             }
 
-            // -----------------------------
-            // INPUT BAR
-            // -----------------------------
+            // ⭐ MESSAGE INPUT BAR
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -115,9 +104,6 @@ fun ChatScreen(navController: NavHostController, conversationId: String) {
     }
 }
 
-// -----------------------------
-// CHAT BUBBLE
-// -----------------------------
 @Composable
 fun ChatBubble(msg: Message) {
 
