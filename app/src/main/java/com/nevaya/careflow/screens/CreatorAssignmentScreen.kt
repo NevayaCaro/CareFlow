@@ -5,12 +5,18 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.nevaya.careflow.data.SessionStore
+import com.nevaya.careflow.ui.theme.GreenDark
+import com.nevaya.careflow.ui.theme.GreenPrimary
+import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Color
+
 
 @Composable
 fun CreatorAssignmentScreen(
@@ -32,41 +38,72 @@ fun CreatorAssignmentScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .background(Color.White)
     ) {
 
-        //  SMALL TOP LEFT BACK BUTTON
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp)
+        // TOP BAR (matches inspo)
+        Surface(
+            color = GreenPrimary,
+            shadowElevation = 4.dp,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Button(
-                onClick = { onBack() },
+            Box(
                 modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .height(36.dp)
-                    .wrapContentWidth(),
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp)
+                    .fillMaxWidth()
+                    .padding(vertical = 20.dp),
+                contentAlignment = Alignment.Center
             ) {
-                Text("Back")
+                Text(
+                    text = "Creator Shift View",
+                    color = Color.White,
+                    style = MaterialTheme.typography.headlineSmall
+                )
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
-        Text("CREATOR SHIFT VIEW")
-        Text("Code: ${session.code}")
+        // BACK BUTTON
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Button(
+                onClick = { onBack() },
+                colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary),
+                shape = RoundedCornerShape(50.dp),
+                modifier = Modifier.height(36.dp)
+            ) {
+                Text("Back", color = Color.White)
+            }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.weight(1f))
 
+            Text(
+                text = "Code: ${session.code}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = GreenDark
+            )
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // LIST OF NAMES
         if (selectedName == null) {
 
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.padding(horizontal = 16.dp)
+            ) {
 
                 items(grouped.keys.toList()) { name ->
 
                     Card(
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = GreenPrimary),
+                        elevation = CardDefaults.cardElevation(4.dp),
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable(
@@ -76,15 +113,21 @@ fun CreatorAssignmentScreen(
                                 selectedName = name
                             }
                     ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(text = name)
+                        Column(
+                            modifier = Modifier.padding(20.dp)
+                        ) {
+                            Text(
+                                text = name,
+                                color = Color.White,
+                                style = MaterialTheme.typography.titleMedium
+                            )
                         }
                     }
                 }
             }
 
         } else {
-
+            // DETAIL VIEW
             val assignments = grouped[selectedName].orEmpty()
             val first = assignments.firstOrNull()
 
@@ -108,30 +151,76 @@ fun CreatorAssignmentScreen(
                 ?.filter { it.isNotEmpty() }
                 ?: emptyList()
 
-            Button(onClick = { selectedName = null }) {
-                Text("Back")
-            }
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth()
+            ) {
 
-            Spacer(modifier = Modifier.height(12.dp))
+                Button(
+                    onClick = { selectedName = null },
+                    colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary),
+                    shape = RoundedCornerShape(50.dp),
+                    modifier = Modifier.height(40.dp)
+                ) {
+                    Text("Back", color = Color.White)
+                }
 
-            Text("$selectedName ($role)")
+                Spacer(modifier = Modifier.height(20.dp))
 
-            Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    "$selectedName ($role)",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = GreenDark
+                )
 
-            Text("Rooms: ${rooms.joinToString(", ")}")
+                Spacer(modifier = Modifier.height(20.dp))
 
-            Spacer(modifier = Modifier.height(12.dp))
+                // ROOMS CARD
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = GreenPrimary),
+                    elevation = CardDefaults.cardElevation(4.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Text("Rooms", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(rooms.joinToString(", "), color = Color.White)
+                    }
+                }
 
-            Text("Showers")
-            showers.forEach { room ->
-                Text("Room $room")
-            }
+                Spacer(modifier = Modifier.height(16.dp))
 
-            Spacer(modifier = Modifier.height(12.dp))
+                // SHOWERS CARD
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = GreenPrimary),
+                    elevation = CardDefaults.cardElevation(4.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Text("Showers", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        showers.forEach { Text("Room $it", color = Color.White) }
+                    }
+                }
 
-            Text("Meals")
-            meals.forEach { room ->
-                Text("Room $room")
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // MEALS CARD
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = GreenPrimary),
+                    elevation = CardDefaults.cardElevation(4.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Text("Meals", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        meals.forEach { Text("Room $it", color = Color.White) }
+                    }
+                }
             }
         }
     }

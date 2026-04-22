@@ -27,27 +27,42 @@ fun CreateJoinScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(Color.White)
     ) {
 
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
 
+            // TOP BAR
+            Surface(
+                color = GreenPrimary,
+                shadowElevation = 4.dp,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 20.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "CareFlow",
+                        color = Color.White,
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(40.dp))
 
-            Text(
-                text = "CareFlow",
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-
-            Spacer(modifier = Modifier.weight(1f))
-
+            // MAIN CARD
             Card(
                 shape = RoundedCornerShape(22.dp),
                 colors = CardDefaults.cardColors(containerColor = GreenPrimary),
+                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                 modifier = Modifier
-                    .width(320.dp)
+                    .width(330.dp)
                     .align(Alignment.CenterHorizontally)
             ) {
 
@@ -63,36 +78,39 @@ fun CreateJoinScreen(
                         shape = RoundedCornerShape(50.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(45.dp)
+                            .height(48.dp)
                     ) {
-                        Text("Join Code")
+                        Text("Join Code", color = Color.White)
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // CREATE BUTTON
                     Button(
-                        onClick = {
-                            onCreateClick("")
-                        },
+                        onClick = { onCreateClick("") },
                         colors = ButtonDefaults.buttonColors(containerColor = GreenDark),
                         shape = RoundedCornerShape(50.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(45.dp)
+                            .height(48.dp)
                     ) {
-                        Text("Create")
+                        Text("Create", color = Color.White)
                     }
 
-                    // JOIN INPUT
+                    // JOIN INPUT SECTION
                     if (showJoinField) {
 
-                        Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(28.dp))
 
-                        Text("Enter Code")
+                        Text(
+                            "Enter Code",
+                            color = Color.White,
+                            style = MaterialTheme.typography.titleMedium
+                        )
 
                         Spacer(modifier = Modifier.height(16.dp))
 
+                        // CODE DOTS
                         Row(
                             horizontalArrangement = Arrangement.Center,
                             modifier = Modifier.fillMaxWidth()
@@ -100,6 +118,8 @@ fun CreateJoinScreen(
                             repeat(4) { index ->
                                 Text(
                                     text = if (index < joinCode.length) "●" else "○",
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.headlineSmall,
                                     modifier = Modifier.padding(8.dp)
                                 )
                             }
@@ -107,6 +127,7 @@ fun CreateJoinScreen(
 
                         Spacer(modifier = Modifier.height(20.dp))
 
+                        // KEYPAD
                         val buttons = listOf(
                             listOf("1", "2", "3"),
                             listOf("4", "5", "6"),
@@ -120,44 +141,28 @@ fun CreateJoinScreen(
                                 Row {
                                     row.forEach { label ->
 
-                                        Button(
+                                        ElevatedButton(
                                             onClick = {
-
                                                 when (label) {
-
-                                                    "DEL" -> {
-                                                        if (joinCode.isNotEmpty()) {
-                                                            joinCode = joinCode.dropLast(1)
-                                                        }
-                                                    }
-
+                                                    "DEL" -> if (joinCode.isNotEmpty()) joinCode = joinCode.dropLast(1)
                                                     "ENT" -> {
                                                         if (joinCode.length == 4) {
-
-                                                            val session =
-                                                                SessionStore.getSession(joinCode)
-
-                                                            if (session != null) {
-                                                                onJoinValid(joinCode)
-                                                            } else {
-                                                                errorMessage = "Invalid code"
-                                                            }
-
-                                                        } else {
-                                                            errorMessage = "Enter 4-digit code"
-                                                        }
+                                                            val session = SessionStore.getSession(joinCode)
+                                                            if (session != null) onJoinValid(joinCode)
+                                                            else errorMessage = "Invalid code"
+                                                        } else errorMessage = "Enter 4-digit code"
                                                     }
-
-                                                    else -> {
-                                                        if (joinCode.length < 4) {
-                                                            joinCode += label
-                                                        }
-                                                    }
+                                                    else -> if (joinCode.length < 4) joinCode += label
                                                 }
                                             },
                                             modifier = Modifier
                                                 .padding(6.dp)
-                                                .size(70.dp)
+                                                .size(70.dp),
+                                            shape = RoundedCornerShape(16.dp),
+                                            colors = ButtonDefaults.elevatedButtonColors(
+                                                containerColor = GreenDark,
+                                                contentColor = Color.White
+                                            )
                                         ) {
                                             Text(label)
                                         }
@@ -178,4 +183,3 @@ fun CreateJoinScreen(
         }
     }
 }
-
