@@ -14,7 +14,6 @@ import com.nevaya.careflow.screens.CreatorAssignmentScreen
 import com.nevaya.careflow.screens.WorkerAssignmentScreen
 import com.nevaya.careflow.ui.theme.CareFlowTheme
 
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,7 +33,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding)
                     ) {
 
-                        // FIRST SCREEN
+                        // CREATE / JOIN SCREEN
                         composable("createJoin") {
                             CreateJoinScreen(
                                 onCreateClick = {
@@ -46,7 +45,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        // SECOND SCREEN
+                        // CREATE SCREEN
                         composable("create") {
                             CreateScreen(
                                 onDoneClick = { code ->
@@ -56,22 +55,30 @@ class MainActivity : ComponentActivity() {
                                     navController.popBackStack()
                                 }
                             )
-
                         }
 
+                        // WORKER SCREEN
                         composable("worker/{code}") { backStackEntry ->
                             val code = backStackEntry.arguments?.getString("code") ?: ""
 
-                            WorkerAssignmentScreen(sessionCode = code)
+                            WorkerAssignmentScreen(
+                                sessionCode = code,
+                                onBack = {
+                                    // 👇 goes back to CreateJoin screen safely
+                                    navController.popBackStack()
+                                }
+                            )
                         }
 
+                        // CREATOR SCREEN
                         composable("creator/{code}") { backStackEntry ->
                             val code = backStackEntry.arguments?.getString("code") ?: ""
 
                             CreatorAssignmentScreen(
                                 sessionCode = code,
                                 onBack = {
-                                    navController.navigate("createJoin")
+                                    // 👇 also returns properly instead of stacking screens
+                                    navController.popBackStack()
                                 }
                             )
                         }

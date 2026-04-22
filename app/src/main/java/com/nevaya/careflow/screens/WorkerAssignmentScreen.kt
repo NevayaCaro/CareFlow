@@ -6,6 +6,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -14,13 +16,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.RoundedCornerShape
 import com.nevaya.careflow.data.SessionStore
-import com.nevaya.careflow.data.NurseAssignment
-import com.nevaya.careflow.data.TaskItem
 import com.nevaya.careflow.ui.theme.GreenPrimary
 import com.nevaya.careflow.ui.theme.GreenDark
 
 @Composable
-fun WorkerAssignmentScreen(sessionCode: String) {
+fun WorkerAssignmentScreen(
+    sessionCode: String,
+    onBack: () -> Unit
+) {
 
     val session = SessionStore.getSession(sessionCode)
 
@@ -31,8 +34,7 @@ fun WorkerAssignmentScreen(sessionCode: String) {
 
     var selectedName by remember { mutableStateOf<String?>(null) }
 
-    val grouped: Map<String, List<NurseAssignment>> =
-        session.assignments.groupBy { it.name }
+    val grouped = session.assignments.groupBy { it.name }
 
     Column(
         modifier = Modifier
@@ -43,67 +45,57 @@ fun WorkerAssignmentScreen(sessionCode: String) {
         // TOP BAR
         Surface(
             color = GreenPrimary,
-            shadowElevation = 4.dp,
             modifier = Modifier.fillMaxWidth()
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 20.dp),
-                contentAlignment = Alignment.Center
+                    .padding(16.dp)
             ) {
-                Text(
-                    text = "Shift Board",
-                    color = Color.White,
-                    style = MaterialTheme.typography.headlineSmall
-                )
+
+                IconButton(
+                    onClick = { onBack() },
+                    modifier = Modifier.align(Alignment.CenterStart)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Back",
+                        tint = Color.White
+                    )
+                }
+
+                Column(
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Shift Board",
+                        color = Color.White
+                    )
+
+                    // shows generated / session code
+                    Text(
+                        text = "Code: ${session.code}",
+                        color = Color.White,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
         }
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // CODE + BACK BUTTON ROW
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            Button(
-                onClick = { selectedName = null },
-                colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary),
-                shape = RoundedCornerShape(50.dp),
-                modifier = Modifier.height(36.dp)
-            ) {
-                Text("Back", color = Color.White)
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            Text(
-                text = "Code: ${session.code}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = GreenDark
-            )
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        // LIST OF WORKERS
+        // WORKER LIST
         if (selectedName == null) {
 
             LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
 
                 items(grouped.keys.toList()) { name ->
 
                     Card(
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = GreenPrimary),
-                        elevation = CardDefaults.cardElevation(4.dp),
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable(
@@ -111,97 +103,76 @@ fun WorkerAssignmentScreen(sessionCode: String) {
                                 indication = null
                             ) {
                                 selectedName = name
-                            }
+                            },
+                        colors = CardDefaults.cardColors(containerColor = GreenPrimary),
+                        shape = RoundedCornerShape(16.dp)
                     ) {
-                        Column(
+                        Text(
+                            text = name,
+                            color = Color.White,
                             modifier = Modifier.padding(20.dp)
-                        ) {
-                            Text(
-                                text = name,
-                                color = Color.White,
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                        }
+                        )
                     }
                 }
             }
 
         } else {
 
-            val assignments = grouped[selectedName].orEmpty()
-            val selectedAssignment = assignments.firstOrNull()
+            TextButton(onClick = { selectedName = null }) {
+                Text("← Back", color = GreenDark)
+            }
 
-            val role = assignments.firstOrNull()?.role?.takeIf { it.isNotBlank() } ?: "Unknown"
+            val assignment = grouped[selectedName]?.firstOrNull()
 
-            val rooms = selectedAssignment?.rooms
+            val showerRooms = assignment?.showers
                 ?.split(",")
                 ?.map { it.trim() }
                 ?.filter { it.isNotEmpty() }
                 ?: emptyList()
 
-            val showerTasks = selectedAssignment?.showers
+            val mealRooms = assignment?.meals
                 ?.split(",")
                 ?.map { it.trim() }
                 ?.filter { it.isNotEmpty() }
-                ?.map { TaskItem(it.toInt()) }
                 ?: emptyList()
 
-            val mealTasks = selectedAssignment?.meals
-                ?.split(",")
-                ?.map { it.trim() }
-                ?.filter { it.isNotEmpty() }
-                ?.map { TaskItem(it.toInt()) }
-                ?: emptyList()
+            val showerState = remember(selectedName) {
+                mutableStateMapOf<String, Boolean>().apply {
+                    showerRooms.forEach { put(it, false) }
+                }
+            }
+
+            val mealState = remember(selectedName) {
+                mutableStateMapOf<String, Boolean>().apply {
+                    mealRooms.forEach { put(it, false) }
+                }
+            }
 
             Column(
                 modifier = Modifier
-                    .padding(horizontal = 16.dp)
+                    .padding(16.dp)
                     .fillMaxWidth()
             ) {
 
-                Spacer(modifier = Modifier.height(10.dp))
-
                 Text(
-                    text = "$selectedName ($role)",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = GreenDark
+                    text = selectedName ?: "",
+                    color = GreenDark,
+                    style = MaterialTheme.typography.headlineSmall
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // ROOMS CARD
-                Card(
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = GreenPrimary),
-                    elevation = CardDefaults.cardElevation(4.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
-                        Text("Rooms", color = Color.White, style = MaterialTheme.typography.titleMedium)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            if (rooms.isEmpty()) "None"
-                            else rooms.sorted().joinToString(", "),
-                            color = Color.White
-                        )
-                    }
-                }
+                // SHOWERS
+                Text("Showers", color = GreenDark)
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // SHOWERS CARD
-                Text("Showers", style = MaterialTheme.typography.titleMedium, color = GreenDark)
-                Spacer(modifier = Modifier.height(8.dp))
-
-                showerTasks.forEach { task ->
+                showerRooms.forEach { room ->
 
                     Card(
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = GreenPrimary),
-                        elevation = CardDefaults.cardElevation(4.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 4.dp)
+                            .padding(vertical = 4.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = GreenPrimary)
                     ) {
 
                         Row(
@@ -212,22 +183,17 @@ fun WorkerAssignmentScreen(sessionCode: String) {
                         ) {
 
                             Column {
-                                Text("Room ${task.room}", color = Color.White)
+                                Text("Room $room", color = Color.White)
+
                                 Text(
-                                    if (task.done)
-                                        "Done at ${task.completedAt}"
-                                    else
-                                        "Not completed",
+                                    if (showerState[room] == true) "COMPLETED"
+                                    else "Not completed",
                                     color = Color.White
                                 )
                             }
 
                             Button(
-                                onClick = {
-                                    task.done = true
-                                    task.completedAt = java.text.SimpleDateFormat("HH:mm MM/dd")
-                                        .format(java.util.Date())
-                                },
+                                onClick = { showerState[room] = true },
                                 colors = ButtonDefaults.buttonColors(containerColor = GreenDark)
                             ) {
                                 Text("Done", color = Color.White)
@@ -238,19 +204,17 @@ fun WorkerAssignmentScreen(sessionCode: String) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // MEALS CARD
-                Text("Meals", style = MaterialTheme.typography.titleMedium, color = GreenDark)
-                Spacer(modifier = Modifier.height(8.dp))
+                // MEALS
+                Text("Meals", color = GreenDark)
 
-                mealTasks.forEach { task ->
+                mealRooms.forEach { room ->
 
                     Card(
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = GreenPrimary),
-                        elevation = CardDefaults.cardElevation(4.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 4.dp)
+                            .padding(vertical = 4.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = GreenPrimary)
                     ) {
 
                         Row(
@@ -261,22 +225,17 @@ fun WorkerAssignmentScreen(sessionCode: String) {
                         ) {
 
                             Column {
-                                Text("Room ${task.room}", color = Color.White)
+                                Text("Room $room", color = Color.White)
+
                                 Text(
-                                    if (task.done)
-                                        "Done at ${task.completedAt}"
-                                    else
-                                        "Not completed",
+                                    if (mealState[room] == true) "COMPLETED"
+                                    else "Not completed",
                                     color = Color.White
                                 )
                             }
 
                             Button(
-                                onClick = {
-                                    task.done = true
-                                    task.completedAt = java.text.SimpleDateFormat("HH:mm MM/dd")
-                                        .format(java.util.Date())
-                                },
+                                onClick = { mealState[room] = true },
                                 colors = ButtonDefaults.buttonColors(containerColor = GreenDark)
                             ) {
                                 Text("Done", color = Color.White)

@@ -278,157 +278,158 @@ fun CreateScreen(
             3 -> {
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.Center)
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(top = 80.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
-                    // CARD BEHIND INPUTS
+                    // MAIN CONTAINER
                     Card(
                         shape = RoundedCornerShape(22.dp),
                         colors = CardDefaults.cardColors(containerColor = GreenPrimary),
                         modifier = Modifier
-                            .fillMaxWidth(0.95f)
-                            .wrapContentHeight()
-                            .padding(vertical = 16.dp)
+                            .width(340.dp)
                     ) {
-                        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            // FIRST ROOM
-                            OutlinedTextField(
-                                value = firstRoom,
-                                onValueChange = {},
-                                readOnly = true,
-                                label = { Text("First Room Number", color = TextPrimary) },
-                                singleLine = true,
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = OutlinedTextFieldDefaults.colors()
+
+                        Column(
+                            modifier = Modifier.padding(20.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+
+                            // INPUT DISPLAY AREA
+                            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+
+                                OutlinedTextField(
+                                    value = firstRoom,
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    label = { Text("First Room") },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+
+                                OutlinedTextField(
+                                    value = lastRoom,
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    label = { Text("Last Room") },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(14.dp))
+
+                            Text(
+                                text = if (activeRoomField == 1) "Enter First Room" else "Enter Last Room",
+                                color = TextPrimary
                             )
-                            // LAST ROOM
-                            OutlinedTextField(
-                                value = lastRoom,
-                                onValueChange = {},
-                                readOnly = true,
-                                label = { Text("Last Room Number", color = TextPrimary) },
-                                singleLine = true,
-                                modifier = Modifier.fillMaxWidth()
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            // KEYPAD (JOIN SCREEN STYLE)
+                            val buttons = listOf(
+                                listOf("1", "2", "3"),
+                                listOf("4", "5", "6"),
+                                listOf("7", "8", "9"),
+                                listOf("DEL", "0", "NEXT")
                             )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(12.dp))
 
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                buttons.forEach { row ->
+                                    Row {
+                                        row.forEach { label ->
 
-                        Text(
-                            text = if (activeRoomField == 1) "Entering First Room" else "Entering Last Room",
-                            color = TextPrimary
-                        )
+                                            ElevatedButton(
+                                                onClick = {
 
-                        val buttons = listOf(
-                            listOf("1", "2", "3"),
-                            listOf("4", "5", "6"),
-                            listOf("7", "8", "9"),
-                            listOf("DEL", "0", "NEXT")
-                        )
+                                                    val current =
+                                                        if (activeRoomField == 1) firstRoom else lastRoom
 
-                        buttons.forEach { row ->
-                            Row {
-                                row.forEach { label ->
+                                                    when (label) {
 
-                                    Button(
-                                        onClick = {
+                                                        "DEL" -> {
+                                                            val updated = current.dropLast(1)
+                                                            if (activeRoomField == 1) firstRoom = updated else lastRoom =
+                                                                updated
+                                                        }
 
-                                            val current = if (activeRoomField == 1) firstRoom else lastRoom
+                                                        "NEXT" -> {
+                                                            activeRoomField =
+                                                                if (activeRoomField == 1) 2 else 1
+                                                        }
 
-                                            when (label) {
-
-                                                "DEL" -> {
-                                                    val updated = current.dropLast(1)
-                                                    if (activeRoomField == 1) firstRoom = updated else lastRoom = updated
-                                                }
-
-                                                "NEXT" -> {
-                                                    activeRoomField = if (activeRoomField == 1) 2 else 1
-                                                }
-
-                                                else -> {
-                                                    if (current.length < 4) {
-                                                        val updated = current + label
-                                                        if (activeRoomField == 1) firstRoom = updated else lastRoom = updated
+                                                        else -> {
+                                                            if (current.length < 4) {
+                                                                val updated = current + label
+                                                                if (activeRoomField == 1) firstRoom =
+                                                                    updated else lastRoom = updated
+                                                            }
+                                                        }
                                                     }
-                                                }
+                                                },
+                                                modifier = Modifier
+                                                    .padding(6.dp)
+                                                    .size(70.dp),
+                                                shape = RoundedCornerShape(16.dp),
+                                                colors = ButtonDefaults.elevatedButtonColors(
+                                                    containerColor = GreenDark,
+                                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                                )
+                                            ) {
+                                                Text(label)
                                             }
-                                        },
-                                        modifier = Modifier
-                                            .padding(6.dp)
-                                            .size(70.dp)
-                                    ) {
-                                        Text(label)
+                                        }
                                     }
                                 }
                             }
-                        }
-                    }
 
-                    // CARD BEHIND BUTTONS
-                    Card(
-                        shape = RoundedCornerShape(22.dp),
-                        colors = CardDefaults.cardColors(containerColor = GreenPrimary),
-                        modifier = Modifier
-                            .fillMaxWidth(0.95f)
-                            .wrapContentHeight()
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            // DELETE BUTTON
-                            Button(
-                                onClick = {
-                                    firstRoom = ""
-                                    lastRoom = ""
-                                    roomsList = emptyList()
-                                    activeRoomField = 1
-                                },
-                                colors = ButtonDefaults.buttonColors(containerColor = GreenDark),
-                                modifier = Modifier.weight(1f)
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            // ACTION BUTTONS ROW
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text("Delete", color = MaterialTheme.colorScheme.onPrimary)
-                            }
 
-                            Spacer(modifier = Modifier.width(16.dp))
+                                Button(
+                                    onClick = {
+                                        firstRoom = ""
+                                        lastRoom = ""
+                                        roomsList = emptyList()
+                                        activeRoomField = 1
+                                    },
+                                    colors = ButtonDefaults.buttonColors(containerColor = GreenDark),
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text("Clear")
+                                }
 
-                            // DONE BUTTON
-                            Button(
-                                onClick = {
+                                Spacer(modifier = Modifier.width(12.dp))
 
-                                    val start = firstRoom.toIntOrNull()
-                                    val end = lastRoom.toIntOrNull()
+                                Button(
+                                    onClick = {
 
-                                    roomsList = if (start != null && end != null && end >= start) {
-                                        (start..end).toList()
-                                    } else {
-                                        emptyList()
-                                    }
+                                        val start = firstRoom.toIntOrNull()
+                                        val end = lastRoom.toIntOrNull()
 
-                                    val sessionValue = session.value
+                                        roomsList =
+                                            if (start != null && end != null && end >= start) {
+                                                (start..end).toList()
+                                            } else emptyList()
 
-                                    // store rooms
-                                    sessionValue.rooms = roomsList
+                                        val sessionValue = session.value
 
-                                    // create task lists for tracking
-                                    sessionValue.showerTasks = roomsList.map { TaskItem(it) }
-                                    sessionValue.mealTasks = roomsList.map { TaskItem(it) }
+                                        sessionValue.rooms = roomsList
+                                        sessionValue.showerTasks = roomsList.map { TaskItem(it) }
+                                        sessionValue.mealTasks = roomsList.map { TaskItem(it) }
 
-                                    currentStep = 1
-                                },
-                                colors = ButtonDefaults.buttonColors(containerColor = GreenDark),
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Text("Done", color = MaterialTheme.colorScheme.onPrimary)
+                                        currentStep = 1
+                                    },
+                                    colors = ButtonDefaults.buttonColors(containerColor = GreenDark),
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text("Done")
+                                }
                             }
                         }
                     }
