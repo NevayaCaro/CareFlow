@@ -64,7 +64,7 @@ class MainActivity : ComponentActivity() {
                             WorkerAssignmentScreen(
                                 sessionCode = code,
                                 onBack = {
-                                    // 👇 goes back to CreateJoin screen safely
+                                    //  goes back to CreateJoin screen safely
                                     navController.popBackStack()
                                 }
                             )
@@ -77,7 +77,7 @@ class MainActivity : ComponentActivity() {
                             CreatorAssignmentScreen(
                                 sessionCode = code,
                                 onBack = {
-                                    // 👇 also returns properly instead of stacking screens
+                                    //  also returns properly instead of stacking screens
                                     navController.popBackStack()
                                 }
                             )

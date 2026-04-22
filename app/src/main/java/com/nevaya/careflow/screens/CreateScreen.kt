@@ -3,6 +3,7 @@ package com.nevaya.careflow.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -38,7 +39,6 @@ fun CreateScreen(
     var selectedRole by remember { mutableStateOf("CNA") }
     var errorMessage by remember { mutableStateOf("") }
 
-
     // Step 3: Rooms
     var firstRoom by remember { mutableStateOf("") }
     var lastRoom by remember { mutableStateOf("") }
@@ -48,9 +48,12 @@ fun CreateScreen(
     val session = remember(generatedCode) {
         mutableStateOf(SessionStore.createSession(generatedCode))
     }
+
     var creatorCode by remember { mutableStateOf(TextFieldValue("")) }
     var activeRoomField by remember { mutableStateOf(1) }
 
+    // HELP STATE
+    var showHelp by remember { mutableStateOf(false) }
 
     Box(
         modifier = modifier
@@ -58,7 +61,7 @@ fun CreateScreen(
             .background(AppBackground)
     ) {
 
-        // TOP BACK BUTTON (for all steps except step 1)
+        // TOP BACK BUTTON
         Button(
             onClick = {
                 if (currentStep == 1) {
@@ -74,19 +77,82 @@ fun CreateScreen(
         ) {
             Text("Back", color = MaterialTheme.colorScheme.onPrimary)
         }
-        // CODE TOP RIGHT
-        Text(
-            text = "CODE: $generatedCode",
-            color = TextPrimary,
-            fontSize = 22.sp,
+
+        // TOP RIGHT CODE + INFO BUTTON
+        Row(
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .zIndex(10f)
-        )
+                .zIndex(10f),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            // CLEAN BUBBLE INFO BUTTON
+            Surface(
+                shape = CircleShape,
+                color = GreenDark,
+                tonalElevation = 4.dp,
+                modifier = Modifier.size(38.dp)
+            ) {
+                IconButton(
+                    onClick = { showHelp = !showHelp }
+                ) {
+                    Text(
+                        text = "i",
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontSize = 16.sp
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Text(
+                text = "CODE: $generatedCode",
+                color = TextPrimary,
+                fontSize = 22.sp
+            )
+        }
+
+        // HELP POPUP
+        if (showHelp) {
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = GreenPrimary),
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 60.dp, end = 16.dp)
+                    .width(260.dp)
+                    .zIndex(20f)
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+
+                    Text(
+                        text = "How this screen works:",
+                        fontSize = 14.sp,
+                        color = TextPrimary
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Text(
+                        text =
+                            " Start in Rooms, enter a first and last room range.\n" +
+                                    " Press Done to generate the room list.\n" +
+                                    " Go to Assign to add a worker and name them.\n" +
+                                    " Select their role and assign specific rooms/tasks.\n" +
+                                    " You can edit or delete assignments from this screen once added in Assign.\n" +
+                                    " Press Done in Assign to save and return to this screen.\n" +
+                                    " Once you press Done on this screen,\n" +
+                                    " it'll transfer you to your assignment screen (Creator Assignment Screen)",
+                        fontSize = 12.sp,
+                        color = TextPrimary
+                    )
+                }
+            }
+        }
 
         when (currentStep) {
 
-            // STEP 1: ASSIGN + ROOMS BUTTON
             1 -> {
                 Column(
                     modifier = Modifier
@@ -96,13 +162,11 @@ fun CreateScreen(
                     verticalArrangement = Arrangement.spacedBy(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    //creator code maker
+
                     Card(
                         shape = RoundedCornerShape(22.dp),
                         colors = CardDefaults.cardColors(containerColor = GreenPrimary),
-                        modifier = Modifier
-                            .width(320.dp)
-                            .align(Alignment.CenterHorizontally)
+                        modifier = Modifier.width(320.dp)
                     ) {
                         Column(
                             modifier = Modifier.padding(16.dp),
@@ -129,46 +193,36 @@ fun CreateScreen(
                             )
 
                             Text(
-                                text = "Make a code to gain access to this created screen when you return from join. Workers use the top-right code to enter worker view, while this code is for creator access only.",
+                                text = "Make a code to gain creator access. Workers use the session code.",
                                 fontSize = 12.sp,
                                 color = TextPrimary
                             )
                         }
                     }
-                    // CARD BEHIND BUTTONS
+
                     Card(
                         shape = RoundedCornerShape(22.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = GreenPrimary,           // card background
-                            contentColor = MaterialTheme.colorScheme.onPrimary // white text/icons inside
-                        ),
-                        modifier = Modifier
-                            .width(320.dp)
-                            .align(Alignment.CenterHorizontally)
+                        colors = CardDefaults.cardColors(containerColor = GreenPrimary),
+                        modifier = Modifier.width(320.dp)
                     ) {
                         Column(
                             modifier = Modifier.padding(32.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
 
-                            // ROOMS BUTTON
                             Button(
-                                onClick = { currentStep = 3 }, // navigate to rooms step
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = GreenDark,                // dark green button
-                                    contentColor = MaterialTheme.colorScheme.onPrimary // white text
-                                ),
+                                onClick = { currentStep = 3 },
+                                colors = ButtonDefaults.buttonColors(containerColor = GreenDark),
                                 shape = RoundedCornerShape(50.dp),
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(45.dp)
                             ) {
-                                Text(text = "Rooms")
+                                Text("Rooms")
                             }
 
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            // ASSIGN BUTTON
                             Button(
                                 onClick = {
                                     nurseName = TextFieldValue("")
@@ -177,18 +231,14 @@ fun CreateScreen(
                                     editIndex = null
                                     currentStep = 2
                                 },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = GreenDark,                // dark green button
-                                    contentColor = MaterialTheme.colorScheme.onPrimary // white text
-                                ),
+                                colors = ButtonDefaults.buttonColors(containerColor = GreenDark),
                                 shape = RoundedCornerShape(50.dp),
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(45.dp)
                             ) {
-                                Text(text = "Assign")
+                                Text("Assign")
                             }
-
                         }
                     }
                     // ASSIGNMENT LIST
@@ -326,7 +376,7 @@ fun CreateScreen(
 
                             Spacer(modifier = Modifier.height(12.dp))
 
-                            // KEYPAD (JOIN SCREEN STYLE)
+                            // KEYPAD
                             val buttons = listOf(
                                 listOf("1", "2", "3"),
                                 listOf("4", "5", "6"),
