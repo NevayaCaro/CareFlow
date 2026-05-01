@@ -24,8 +24,8 @@ import com.nevaya.careflow.data.UserSessionDataStore
 @Composable
 fun ProfileScreen(
     onEditProfile: () -> Unit = {},
-    onViewSchedule: () -> Unit = {},
-    onViewAssignments: () -> Unit = {}
+    onViewAssignments: () -> Unit = {},
+    onViewPatients: () -> Unit   // ⭐ NEW CALLBACK
 ) {
 
     val context = LocalContext.current
@@ -58,7 +58,7 @@ fun ProfileScreen(
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
 
-                    // ⭐ UPDATED PROFILE IMAGE BLOCK
+                    // PROFILE IMAGE
                     Box(
                         modifier = Modifier
                             .size(80.dp)
@@ -134,20 +134,21 @@ fun ProfileScreen(
                 color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)
             )
 
-            // NAVIGATION BUTTONS
+            // ⭐ PATIENTS BUTTON (REPLACES SCHEDULE)
             Button(
-                onClick = onViewSchedule,
+                onClick = onViewPatients,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.secondary,
                     contentColor = MaterialTheme.colorScheme.onSecondary
                 )
             ) {
-                Text("View Full Schedule")
+                Text("Patients")
             }
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            // ASSIGNMENTS BUTTON
             OutlinedButton(
                 onClick = onViewAssignments,
                 modifier = Modifier.fillMaxWidth(),

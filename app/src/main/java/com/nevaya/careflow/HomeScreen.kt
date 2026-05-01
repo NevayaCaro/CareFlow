@@ -7,13 +7,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    padding: PaddingValues,
-    onViewSchedule: () -> Unit = {},
-    onViewAssignments: () -> Unit = {}
+    padding: PaddingValues
 ) {
     Column(
         modifier = Modifier
@@ -31,29 +28,12 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = onViewSchedule,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondary,     // DARK GREEN
-                contentColor = MaterialTheme.colorScheme.onSecondary      // TEXT ON DARK GREEN
-            )
-        ) {
-            Text("View Schedule")
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Button(
-            onClick = onViewAssignments,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondary,     // DARK GREEN
-                contentColor = MaterialTheme.colorScheme.onSecondary
-            )
-        ) {
-            Text("Room Assignments")
-        }
+        // Blank home screen for now — no buttons, no navigation
+        Text(
+            text = "Use the menu to navigate through the app.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+        )
     }
 }
 
