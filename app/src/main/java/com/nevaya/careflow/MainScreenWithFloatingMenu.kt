@@ -1,8 +1,11 @@
 package com.nevaya.careflow.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Assignment
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
@@ -94,8 +97,8 @@ fun MainScreenWithFloatingMenu(
                             navController.navigate("messages")
                             menuExpanded = false
                         }
-                        FloatingMenuItem("Shift Schedule", Icons.Default.CalendarToday) {
-                            navController.navigate("schedule")
+                        FloatingMenuItem("Patients", Icons.AutoMirrored.Filled.Assignment) {
+                            navController.navigate("patients")
                             menuExpanded = false
                         }
                         FloatingMenuItem("Logout", Icons.AutoMirrored.Filled.ExitToApp) {
@@ -122,18 +125,17 @@ fun FloatingMenuItem(
 ) {
     DropdownMenuItem(
         text = {
-            Text(
-                title,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            Text(title, color = MaterialTheme.colorScheme.onSurface)
         },
         leadingIcon = {
-            Icon(
-                icon,
-                contentDescription = title,
-                tint = MaterialTheme.colorScheme.secondary
-            )
+            Icon(icon, contentDescription = title, tint = MaterialTheme.colorScheme.secondary)
         },
-        onClick = onClick
+        onClick = onClick,
+        modifier = Modifier.clickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = null
+        ) {}
     )
+
+
 }

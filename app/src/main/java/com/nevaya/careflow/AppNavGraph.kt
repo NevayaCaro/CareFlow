@@ -32,12 +32,12 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
             LoginScreen(
                 onForgotPassword = { navController.navigate("forgot_password") },
                 onCreateAccount = { navController.navigate("create_account") },
-                onLoginClick = { username ->
+                onLoginClick = {
                     navController.navigate("profile") {
                         popUpTo("login") { inclusive = true }
                     }
                 },
-                onQuickLogin = { username ->   // ⭐ REQUIRED
+                onQuickLogin = {
                     navController.navigate("profile") {
                         popUpTo("login") { inclusive = true }
                     }
@@ -77,7 +77,7 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
         composable("profile") {
             ProfileScreen(
                 onEditProfile = { navController.navigate("edit_profile") },
-                onViewSchedule = { navController.navigate("schedule") },
+                onViewPatients = { navController.navigate("patients") },
                 onViewAssignments = { navController.navigate("assignments") }
             )
         }
@@ -87,9 +87,15 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
             HomeScreen(padding)
         }
 
-        // SCHEDULE
-        composable("schedule") {
-            ScheduleScreen(padding)
+        // ⭐ FIXED PATIENTS SCREEN ROUTE
+        composable("patients") {
+            PatientsScreen(navController)
+        }
+
+        // ⭐ PATIENT CARD SCREEN
+        composable("patient_card/{roomNumber}") { backStackEntry ->
+            val roomNumber = backStackEntry.arguments?.getString("roomNumber")?.toInt() ?: 0
+            PatientCardScreen(navController, roomNumber)
         }
 
         // ASSIGNMENTS
@@ -102,7 +108,7 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
             MessagesScreen(navController, padding)
         }
 
-        // CHAT SCREEN (NEW)
+        // CHAT SCREEN
         composable("chat/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id") ?: ""
             ChatScreen(navController, id)
@@ -113,11 +119,7 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
             SettingsScreen(navController, padding)
         }
 
-        // -----------------------------
         // SETTINGS SUB-SCREENS
-        // -----------------------------
-
-        // ACCOUNT
         composable("edit_profile") { EditProfileScreen(navController) }
         composable("change_password") { ChangePasswordScreen(navController) }
         composable("two_factor") { TwoFactorAuthScreen(navController) }
