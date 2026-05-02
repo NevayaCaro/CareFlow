@@ -1,5 +1,6 @@
 package com.nevaya.careflow.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -16,7 +17,7 @@ import com.nevaya.careflow.ui.theme.GreenDark
 import com.nevaya.careflow.ui.theme.GreenPrimary
 import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.Color
-
+import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 fun CreatorAssignmentScreen(
@@ -38,45 +39,50 @@ fun CreatorAssignmentScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(Color(0xFFF6F6F6))
     ) {
 
-        // TOP BAR (matches inspo)
+
         Surface(
             color = GreenPrimary,
-            shadowElevation = 4.dp,
+            shadowElevation = 6.dp,
+            shape = RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 20.dp),
+                    .padding(vertical = 18.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "Creator Shift View",
                     color = Color.White,
-                    style = MaterialTheme.typography.headlineSmall
+                    style = MaterialTheme.typography.titleLarge
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        // BACK BUTTON
+
         Row(
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Button(
-                onClick = { onBack() },
-                colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary),
-                shape = RoundedCornerShape(50.dp),
-                modifier = Modifier.height(36.dp)
+            OutlinedButton(
+                onClick = {
+                    if (selectedName != null) {
+                        selectedName = null // go back to list
+                    } else {
+                        onBack() // exit screen
+                    }
+                },
+                shape = RoundedCornerShape(50)
             ) {
-                Text("Back", color = Color.White)
+                Text("Back")
             }
 
             Spacer(modifier = Modifier.weight(1f))
@@ -88,10 +94,10 @@ fun CreatorAssignmentScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        // LIST OF NAMES
         if (selectedName == null) {
+
 
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -101,9 +107,10 @@ fun CreatorAssignmentScreen(
                 items(grouped.keys.toList()) { name ->
 
                     Card(
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = GreenPrimary),
-                        elevation = CardDefaults.cardElevation(4.dp),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(6.dp),
+                        border = BorderStroke(1.dp, GreenPrimary.copy(alpha = 0.15f)),
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable(
@@ -118,8 +125,10 @@ fun CreatorAssignmentScreen(
                         ) {
                             Text(
                                 text = name,
-                                color = Color.White,
-                                style = MaterialTheme.typography.titleMedium
+                                color = Color.Black,
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Medium
+                                )
                             )
                         }
                     }
@@ -127,7 +136,8 @@ fun CreatorAssignmentScreen(
             }
 
         } else {
-            // DETAIL VIEW
+
+
             val assignments = grouped[selectedName].orEmpty()
             val first = assignments.firstOrNull()
 
@@ -157,16 +167,7 @@ fun CreatorAssignmentScreen(
                     .fillMaxWidth()
             ) {
 
-                Button(
-                    onClick = { selectedName = null },
-                    colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary),
-                    shape = RoundedCornerShape(50.dp),
-                    modifier = Modifier.height(40.dp)
-                ) {
-                    Text("Back", color = Color.White)
-                }
-
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
                     "$selectedName ($role)",
@@ -174,19 +175,27 @@ fun CreatorAssignmentScreen(
                     color = GreenDark
                 )
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
                 // ROOMS CARD
                 Card(
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = GreenPrimary),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
                     elevation = CardDefaults.cardElevation(4.dp),
+                    border = BorderStroke(1.dp, GreenPrimary.copy(alpha = 0.15f)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
-                        Text("Rooms", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            "Rooms",
+                            color = GreenPrimary,
+                            fontWeight = FontWeight.Bold
+                        )
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(rooms.joinToString(", "), color = Color.White)
+                        Text(
+                            rooms.joinToString(", "),
+                            color = Color.DarkGray
+                        )
                     }
                 }
 
@@ -194,15 +203,22 @@ fun CreatorAssignmentScreen(
 
                 // SHOWERS CARD
                 Card(
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = GreenPrimary),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
                     elevation = CardDefaults.cardElevation(4.dp),
+                    border = BorderStroke(1.dp, GreenPrimary.copy(alpha = 0.15f)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
-                        Text("Showers", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            "Showers",
+                            color = GreenPrimary,
+                            fontWeight = FontWeight.Bold
+                        )
                         Spacer(modifier = Modifier.height(8.dp))
-                        showers.forEach { Text("Room $it", color = Color.White) }
+                        showers.forEach {
+                            Text("Room $it", color = Color.DarkGray)
+                        }
                     }
                 }
 
@@ -210,15 +226,22 @@ fun CreatorAssignmentScreen(
 
                 // MEALS CARD
                 Card(
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = GreenPrimary),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
                     elevation = CardDefaults.cardElevation(4.dp),
+                    border = BorderStroke(1.dp, GreenPrimary.copy(alpha = 0.15f)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
-                        Text("Meals", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            "Meals",
+                            color = GreenPrimary,
+                            fontWeight = FontWeight.Bold
+                        )
                         Spacer(modifier = Modifier.height(8.dp))
-                        meals.forEach { Text("Room $it", color = Color.White) }
+                        meals.forEach {
+                            Text("Room $it", color = Color.DarkGray)
+                        }
                     }
                 }
             }
