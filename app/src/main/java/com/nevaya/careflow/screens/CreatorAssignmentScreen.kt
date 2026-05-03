@@ -18,6 +18,8 @@ import com.nevaya.careflow.ui.theme.GreenPrimary
 import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 
 @Composable
 fun CreatorAssignmentScreen(
@@ -33,102 +35,103 @@ fun CreatorAssignmentScreen(
     }
 
     var selectedName by remember { mutableStateOf<String?>(null) }
-
     val grouped = session.assignments.groupBy { it.name }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF6F6F6))
+            .background(Color(0xFFF4F6F8))
     ) {
 
-
+        //  TOP BAR
         Surface(
             color = GreenPrimary,
             shadowElevation = 6.dp,
-            shape = RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp),
-            modifier = Modifier.fillMaxWidth()
+            shape = RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 18.dp),
-                contentAlignment = Alignment.Center
+                    .padding(16.dp)
             ) {
-                Text(
-                    text = "Creator Shift View",
-                    color = Color.White,
-                    style = MaterialTheme.typography.titleLarge
-                )
+
+                IconButton(
+                    onClick = {
+                        if (selectedName != null) selectedName = null
+                        else onBack()
+                    },
+                    modifier = Modifier.align(Alignment.CenterStart)
+                ) {
+                    Icon(Icons.Default.ArrowBack, null, tint = Color.White)
+                }
+
+                Column(
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        "Shift Overview",
+                        color = Color.White,
+                        style = MaterialTheme.typography.titleLarge
+                    )
+
+                    Text(
+                        "Code: ${session.code}",
+                        color = Color.White.copy(alpha = 0.85f),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            OutlinedButton(
-                onClick = {
-                    if (selectedName != null) {
-                        selectedName = null // go back to list
-                    } else {
-                        onBack() // exit screen
-                    }
-                },
-                shape = RoundedCornerShape(50)
-            ) {
-                Text("Back")
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            Text(
-                text = "Code: ${session.code}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = GreenDark
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(Modifier.height(20.dp))
 
         if (selectedName == null) {
 
-
+            // STAFF LIST (manager view)
             LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
 
                 items(grouped.keys.toList()) { name ->
 
+                    val assignment = grouped[name]?.firstOrNull()
+
                     Card(
-                        shape = RoundedCornerShape(20.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
-                        elevation = CardDefaults.cardElevation(6.dp),
-                        border = BorderStroke(1.dp, GreenPrimary.copy(alpha = 0.15f)),
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null
-                            ) {
-                                selectedName = name
-                            }
+                            ) { selectedName = name },
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        shape = RoundedCornerShape(14.dp),
+                        elevation = CardDefaults.cardElevation(2.dp)
                     ) {
-                        Column(
-                            modifier = Modifier.padding(20.dp)
-                        ) {
+
+                        Column(Modifier.padding(16.dp)) {
+
                             Text(
-                                text = name,
-                                color = Color.Black,
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.Medium
-                                )
+                                name,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = GreenDark
+                            )
+
+                            Spacer(Modifier.height(4.dp))
+
+                            Text(
+                                assignment?.role ?: "",
+                                color = Color.Gray,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+
+                            Spacer(Modifier.height(6.dp))
+
+                            Text(
+                                "Tap to view full assignment",
+                                color = Color.Gray,
+                                style = MaterialTheme.typography.bodySmall
                             )
                         }
                     }
@@ -137,113 +140,95 @@ fun CreatorAssignmentScreen(
 
         } else {
 
+            val assignment = grouped[selectedName]?.firstOrNull()
 
-            val assignments = grouped[selectedName].orEmpty()
-            val first = assignments.firstOrNull()
+            val role = assignment?.role ?: "Unknown"
 
-            val role = first?.role ?: "Unknown"
-
-            val rooms = first?.rooms
-                ?.split(",")
-                ?.map { it.trim() }
-                ?.filter { it.isNotEmpty() }
+            val rooms = assignment?.rooms
+                ?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }
                 ?: emptyList()
 
-            val showers = first?.showers
-                ?.split(",")
-                ?.map { it.trim() }
-                ?.filter { it.isNotEmpty() }
+            val showers = assignment?.showers
+                ?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }
                 ?: emptyList()
 
-            val meals = first?.meals
-                ?.split(",")
-                ?.map { it.trim() }
-                ?.filter { it.isNotEmpty() }
+            val meals = assignment?.meals
+                ?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }
                 ?: emptyList()
 
             Column(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .fillMaxWidth()
+                modifier = Modifier.padding(16.dp)
             ) {
 
-                Spacer(modifier = Modifier.height(8.dp))
-
+                //  HEADER
                 Text(
-                    "$selectedName ($role)",
+                    selectedName ?: "",
                     style = MaterialTheme.typography.headlineSmall,
                     color = GreenDark
                 )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    role,
+                    color = Color.Gray,
+                    style = MaterialTheme.typography.bodyMedium
+                )
 
-                // ROOMS CARD
-                Card(
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(4.dp),
-                    border = BorderStroke(1.dp, GreenPrimary.copy(alpha = 0.15f)),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
-                        Text(
-                            "Rooms",
-                            color = GreenPrimary,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            rooms.joinToString(", "),
-                            color = Color.DarkGray
-                        )
-                    }
-                }
+                Spacer(Modifier.height(16.dp))
 
-                Spacer(modifier = Modifier.height(16.dp))
+                // ROOMS
+                InfoCard(
+                    title = "Rooms",
+                    content = rooms.joinToString(", ")
+                )
 
-                // SHOWERS CARD
-                Card(
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(4.dp),
-                    border = BorderStroke(1.dp, GreenPrimary.copy(alpha = 0.15f)),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
-                        Text(
-                            "Showers",
-                            color = GreenPrimary,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        showers.forEach {
-                            Text("Room $it", color = Color.DarkGray)
-                        }
-                    }
-                }
+                Spacer(Modifier.height(12.dp))
 
-                Spacer(modifier = Modifier.height(16.dp))
+                //  SHOWERS
+                InfoListCard(
+                    title = "Showers",
+                    items = showers.map { "Room $it" }
+                )
 
-                // MEALS CARD
-                Card(
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(4.dp),
-                    border = BorderStroke(1.dp, GreenPrimary.copy(alpha = 0.15f)),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
-                        Text(
-                            "Meals",
-                            color = GreenPrimary,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        meals.forEach {
-                            Text("Room $it", color = Color.DarkGray)
-                        }
-                    }
-                }
+                Spacer(Modifier.height(12.dp))
+
+                // MEALS
+                InfoListCard(
+                    title = "Meals",
+                    items = meals.map { "Room $it" }
+                )
+            }
+        }
+    }
+}
+
+
+@Composable
+fun InfoCard(title: String, content: String) {
+    Card(
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Text(title, color = GreenPrimary)
+            Spacer(Modifier.height(6.dp))
+            Text(content, color = Color.DarkGray)
+        }
+    }
+}
+
+@Composable
+fun InfoListCard(title: String, items: List<String>) {
+    Card(
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Text(title, color = GreenPrimary)
+            Spacer(Modifier.height(6.dp))
+            items.forEach {
+                Text(it, color = Color.DarkGray)
             }
         }
     }

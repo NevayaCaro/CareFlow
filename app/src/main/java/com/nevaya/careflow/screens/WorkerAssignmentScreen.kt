@@ -1,23 +1,27 @@
 package com.nevaya.careflow.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.shape.RoundedCornerShape
 import com.nevaya.careflow.data.SessionStore
-import com.nevaya.careflow.ui.theme.GreenPrimary
 import com.nevaya.careflow.ui.theme.GreenDark
+import com.nevaya.careflow.ui.theme.GreenPrimary
 
 @Composable
 fun WorkerAssignmentScreen(
@@ -33,19 +37,18 @@ fun WorkerAssignmentScreen(
     }
 
     var selectedName by remember { mutableStateOf<String?>(null) }
-
     val grouped = session.assignments.groupBy { it.name }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(Color(0xFFF4F6F8))
     ) {
 
-        // TOP BAR
         Surface(
             color = GreenPrimary,
-            modifier = Modifier.fillMaxWidth()
+            shape = RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp),
+            shadowElevation = 6.dp
         ) {
             Box(
                 modifier = Modifier
@@ -54,12 +57,15 @@ fun WorkerAssignmentScreen(
             ) {
 
                 IconButton(
-                    onClick = { onBack() },
+                    onClick = {
+                        if (selectedName != null) selectedName = null
+                        else onBack()
+                    },
                     modifier = Modifier.align(Alignment.CenterStart)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Back",
+                        Icons.Default.ArrowBack,
+                        contentDescription = null,
                         tint = Color.White
                     )
                 }
@@ -69,31 +75,52 @@ fun WorkerAssignmentScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Shift Board",
-                        color = Color.White
+                        "Shift Board",
+                        color = Color.White,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
                     )
 
-                    // shows generated / session code
                     Text(
-                        text = "Code: ${session.code}",
-                        color = Color.White,
+                        "Code: ${session.code}",
+                        color = Color.White.copy(alpha = 0.85f),
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(Modifier.height(16.dp))
 
-        // WORKER LIST
+
         if (selectedName == null) {
 
             LazyColumn(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
 
                 items(grouped.keys.toList()) { name ->
+
+                    val assignment = grouped[name]?.firstOrNull()
+
+                    val rooms = assignment?.rooms
+                        ?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }
+                        ?: emptyList()
+
+                    val showers = assignment?.showers
+                        ?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }
+                        ?: emptyList()
+
+                    val meals = assignment?.meals
+                        ?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }
+                        ?: emptyList()
+
+                    val workload = when {
+                        rooms.size <= 3 -> "Light"
+                        rooms.size <= 7 -> "Moderate"
+                        else -> "Heavy"
+                    }
 
                     Card(
                         modifier = Modifier
@@ -101,149 +128,178 @@ fun WorkerAssignmentScreen(
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null
-                            ) {
-                                selectedName = name
-                            },
-                        colors = CardDefaults.cardColors(containerColor = GreenPrimary),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Text(
-                            text = name,
-                            color = Color.White,
-                            modifier = Modifier.padding(20.dp)
-                        )
-                    }
-                }
-            }
-
-        } else {
-
-            TextButton(onClick = { selectedName = null }) {
-                Text("← Back", color = GreenDark)
-            }
-
-            val assignment = grouped[selectedName]?.firstOrNull()
-
-            val showerRooms = assignment?.showers
-                ?.split(",")
-                ?.map { it.trim() }
-                ?.filter { it.isNotEmpty() }
-                ?: emptyList()
-
-            val mealRooms = assignment?.meals
-                ?.split(",")
-                ?.map { it.trim() }
-                ?.filter { it.isNotEmpty() }
-                ?: emptyList()
-
-            val showerState = remember(selectedName) {
-                mutableStateMapOf<String, Boolean>().apply {
-                    showerRooms.forEach { put(it, false) }
-                }
-            }
-
-            val mealState = remember(selectedName) {
-                mutableStateMapOf<String, Boolean>().apply {
-                    mealRooms.forEach { put(it, false) }
-                }
-            }
-
-            Column(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth()
-            ) {
-
-                Text(
-                    text = selectedName ?: "",
-                    color = GreenDark,
-                    style = MaterialTheme.typography.headlineSmall
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // SHOWERS
-                Text("Showers", color = GreenDark)
-
-                showerRooms.forEach { room ->
-
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = GreenPrimary)
+                            ) { selectedName = name },
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        shape = RoundedCornerShape(18.dp),
+                        elevation = CardDefaults.cardElevation(3.dp)
                     ) {
 
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
+                        Column(Modifier.padding(16.dp)) {
 
-                            Column {
-                                Text("Room $room", color = Color.White)
+                            Text(
+                                "$name (${assignment?.role ?: "CNA"})",
+                                fontWeight = FontWeight.Bold,
+                                color = GreenDark
+                            )
 
-                                Text(
-                                    if (showerState[room] == true) "COMPLETED"
-                                    else "Not completed",
-                                    color = Color.White
-                                )
-                            }
+                            Spacer(Modifier.height(6.dp))
 
-                            Button(
-                                onClick = { showerState[room] = true },
-                                colors = ButtonDefaults.buttonColors(containerColor = GreenDark)
-                            ) {
-                                Text("Done", color = Color.White)
-                            }
-                        }
-                    }
-                }
+                            Text(
+                                "${rooms.size} rooms • ${showers.size} showers • ${meals.size} meals",
+                                color = Color.Gray
+                            )
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // MEALS
-                Text("Meals", color = GreenDark)
-
-                mealRooms.forEach { room ->
-
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = GreenPrimary)
-                    ) {
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-
-                            Column {
-                                Text("Room $room", color = Color.White)
-
-                                Text(
-                                    if (mealState[room] == true) "COMPLETED"
-                                    else "Not completed",
-                                    color = Color.White
-                                )
-                            }
-
-                            Button(
-                                onClick = { mealState[room] = true },
-                                colors = ButtonDefaults.buttonColors(containerColor = GreenDark)
-                            ) {
-                                Text("Done", color = Color.White)
-                            }
+                            Text(
+                                "Workload: $workload",
+                                color = when (workload) {
+                                    "Light" -> Color(0xFF2E7D32)
+                                    "Moderate" -> Color(0xFFF9A825)
+                                    else -> Color(0xFFC62828)
+                                },
+                                fontWeight = FontWeight.SemiBold
+                            )
                         }
                     }
                 }
             }
         }
+
+
+        else {
+
+            val assignment = grouped[selectedName]?.firstOrNull()
+
+            val rooms = assignment?.rooms
+                ?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }
+                ?: emptyList()
+
+            val showers = assignment?.showers
+                ?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }
+                ?: emptyList()
+
+            val meals = assignment?.meals
+                ?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }
+                ?: emptyList()
+
+            Column(Modifier.padding(16.dp)) {
+
+                Text(
+                    selectedName ?: "",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = GreenDark,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
+                    assignment?.role ?: "",
+                    color = Color.Gray
+                )
+
+                Spacer(Modifier.height(16.dp))
+
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    LegendItem(GreenPrimary, "Assigned")
+                    LegendItem(Color(0xFF42A5F5), "Showers")
+                    LegendItem(Color(0xFFFFA726), "Meals")
+                }
+
+                Spacer(Modifier.height(12.dp))
+
+                Text(
+                    "Room Schedule",
+                    color = GreenPrimary,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(Modifier.height(10.dp))
+
+
+                RoomGrid(
+                    rooms = session.rooms ?: emptyList(),
+                    assignedRooms = rooms,
+                    showerRooms = showers,
+                    mealRooms = meals
+                )
+            }
+        }
+    }
+}
+
+
+
+@Composable
+fun RoomGrid(
+    rooms: List<Int>,
+    assignedRooms: List<String>,
+    showerRooms: List<String>,
+    mealRooms: List<String>
+) {
+
+    val assigned = assignedRooms.mapNotNull { it.toIntOrNull() }
+    val showers = showerRooms.mapNotNull { it.toIntOrNull() }
+    val meals = mealRooms.mapNotNull { it.toIntOrNull() }
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+
+        rooms.chunked(5).forEach { row ->
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+
+                row.forEach { room ->
+
+                    val isAssigned = assigned.contains(room)
+                    val isShower = showers.contains(room)
+                    val isMeal = meals.contains(room)
+
+                    val bg = when {
+                        isShower -> Color(0xFF42A5F5)
+                        isMeal -> Color(0xFFFFA726)
+                        isAssigned -> GreenPrimary
+                        else -> Color.White
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .size(52.dp)
+                            .clip(CircleShape)
+                            .background(bg)
+                            .border(1.dp, Color.LightGray, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            room.toString(),
+                            color = if (bg == Color.White) Color.Gray else Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+@Composable
+fun LegendItem(color: Color, label: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+
+        Box(
+            modifier = Modifier
+                .size(12.dp)
+                .background(color, CircleShape)
+        )
+
+        Spacer(Modifier.width(6.dp))
+
+        Text(
+            label,
+            color = Color.DarkGray,
+            style = MaterialTheme.typography.bodySmall
+        )
     }
 }

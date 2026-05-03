@@ -1,7 +1,6 @@
 package com.nevaya.careflow.screens
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.*
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
@@ -16,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.nevaya.careflow.ui.theme.GreenDark
 import com.nevaya.careflow.ui.theme.GreenPrimary
@@ -34,16 +34,14 @@ fun CreateJoinScreen(
     var errorMessage by remember { mutableStateOf("") }
     var showHelp by remember { mutableStateOf(false) }
 
-    // controls the "pop" animation every 5 seconds
     var pulseTrigger by remember { mutableStateOf(false) }
 
-    val scale by animateFloatAsState(
+    val scale by androidx.compose.animation.core.animateFloatAsState(
         targetValue = if (pulseTrigger) 1.25f else 1f,
-        animationSpec = tween(300),
+        animationSpec = androidx.compose.animation.core.tween(300),
         label = "helpPulse"
     )
 
-    // every 5 seconds trigger a pulse
     LaunchedEffect(Unit) {
         while (true) {
             delay(5000)
@@ -56,37 +54,38 @@ fun CreateJoinScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(Color(0xFFF6F6F6))
     ) {
 
         Column(modifier = Modifier.fillMaxSize()) {
 
-            // TOP BAR
+            //  TOP BAR (MATCHED STYLE)
             Surface(
                 color = GreenPrimary,
-                shadowElevation = 4.dp,
+                shadowElevation = 6.dp,
+                shape = RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 20.dp, horizontal = 16.dp)
+                        .padding(vertical = 18.dp, horizontal = 16.dp)
                 ) {
 
                     Text(
                         text = "CareFlow",
                         color = Color.White,
-                        style = MaterialTheme.typography.headlineSmall,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
                         modifier = Modifier.align(Alignment.Center)
                     )
 
-                    // HELP SECTION (top right)
+                    // HELP BUTTON
                     Row(
                         modifier = Modifier.align(Alignment.CenterEnd),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
 
-                        // EXPANDED HELP PANEL
                         AnimatedVisibility(
                             visible = showHelp,
                             enter = expandVertically(),
@@ -95,17 +94,17 @@ fun CreateJoinScreen(
                             Box(
                                 modifier = Modifier
                                     .background(
-                                        Color.White.copy(alpha = 0.95f),
+                                        Color.White,
                                         RoundedCornerShape(12.dp)
                                     )
-                                    .padding(10.dp)
+                                    .padding(12.dp)
                                     .width(220.dp)
                             ) {
                                 Text(
                                     text =
-                                        " Join Code: enter a 4-digit session code\n" +
-                                                " Create: generates a new session and allows you to add workers and assign tasks \n" +
-                                                " Share code with your team to join",
+                                        "Join Code: enter 4-digit session\n" +
+                                                "Create: starts new shift session\n" +
+                                                "Share code with team",
                                     color = GreenDark,
                                     style = MaterialTheme.typography.bodySmall
                                 )
@@ -114,23 +113,13 @@ fun CreateJoinScreen(
 
                         Spacer(modifier = Modifier.width(8.dp))
 
-                        // NEED HELP BUTTON
-                        Box(
-                            modifier = Modifier
-                                .scale(scale)
-                        ) {
-                            Button(
-                                onClick = { showHelp = !showHelp },
-                                shape = CircleShape,
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = GreenDark
-                                ),
-                                contentPadding = PaddingValues(10.dp),
-                                modifier = Modifier.size(44.dp)
+                        Box(modifier = Modifier.scale(scale)) {
+                            IconButton(
+                                onClick = { showHelp = !showHelp }
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Info,
-                                    contentDescription = "Need Help",
+                                    contentDescription = null,
                                     tint = Color.White
                                 )
                             }
@@ -141,24 +130,24 @@ fun CreateJoinScreen(
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // MAIN CARD
+            //  MAIN CARD (MATCHED STYLE)
             Card(
-                shape = RoundedCornerShape(22.dp),
-                colors = CardDefaults.cardColors(containerColor = GreenPrimary),
-                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(6.dp),
                 modifier = Modifier
                     .width(330.dp)
                     .align(Alignment.CenterHorizontally)
             ) {
 
                 Column(
-                    modifier = Modifier.padding(32.dp),
+                    modifier = Modifier.padding(28.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
                     Button(
                         onClick = { showJoinField = true },
-                        colors = ButtonDefaults.buttonColors(containerColor = GreenDark),
+                        colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary),
                         shape = RoundedCornerShape(50.dp),
                         modifier = Modifier
                             .fillMaxWidth()
@@ -167,11 +156,11 @@ fun CreateJoinScreen(
                         Text("Join Code", color = Color.White)
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
                     Button(
                         onClick = { onCreateClick("") },
-                        colors = ButtonDefaults.buttonColors(containerColor = GreenDark),
+                        colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary),
                         shape = RoundedCornerShape(50.dp),
                         modifier = Modifier
                             .fillMaxWidth()
@@ -182,12 +171,13 @@ fun CreateJoinScreen(
 
                     if (showJoinField) {
 
-                        Spacer(modifier = Modifier.height(28.dp))
+                        Spacer(modifier = Modifier.height(24.dp))
 
                         Text(
                             "Enter Code",
-                            color = Color.White,
-                            style = MaterialTheme.typography.titleMedium
+                            color = GreenDark,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
@@ -199,7 +189,7 @@ fun CreateJoinScreen(
                             repeat(4) { index ->
                                 Text(
                                     text = if (index < joinCode.length) "●" else "○",
-                                    color = Color.White,
+                                    color = GreenPrimary,
                                     style = MaterialTheme.typography.headlineSmall,
                                     modifier = Modifier.padding(8.dp)
                                 )
