@@ -4,13 +4,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.*
-import com.nevaya.careflow.screens.CreateJoinScreen
-import com.nevaya.careflow.screens.CreateScreen
+import androidx.navigation.compose.rememberNavController
+import com.nevaya.careflow.navigation.AppNavGraph
 import com.nevaya.careflow.ui.theme.CareFlowTheme
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,36 +23,17 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize()
                 ) { innerPadding ->
 
-                    NavHost(
+                    // ⭐ AppNavGraph is now the ONLY NavHost in the app
+                    AppNavGraph(
                         navController = navController,
-                        startDestination = "createJoin",
-                        modifier = Modifier.padding(innerPadding)
-                    ) {
-
-                        // FIRST SCREEN
-                        composable("createJoin") {
-                            CreateJoinScreen(
-                                onCreateClick = {
-                                    navController.navigate("create")
-                                }
-                            )
-                        }
-
-                        // SECOND SCREEN
-                        composable("create") {
-                            CreateScreen(
-                                onDoneClick = {
-                                    navController.navigate("createJoin")
-                                },
-                                onBackClick = {
-                                    navController.popBackStack()
-                                }
-                            )
-
-                        }
-                    }
+                        padding = innerPadding
+                    )
                 }
             }
         }
     }
 }
+
+
+
+
