@@ -3,84 +3,48 @@ package com.nevaya.careflow
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.ui.Modifier
-import androidx.navigation.compose.*
-import com.nevaya.careflow.screens.CreateJoinScreen
-import com.nevaya.careflow.screens.CreateScreen
-import com.nevaya.careflow.screens.CreatorAssignmentScreen
-import com.nevaya.careflow.screens.WorkerAssignmentScreen
+import androidx.compose.runtime.*
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.nevaya.careflow.navigation.AppNavGraph
+import com.nevaya.careflow.ui.components.MainScreenWithFloatingMenu
 import com.nevaya.careflow.ui.theme.CareFlowTheme
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.unit.dp
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContent {
+
             CareFlowTheme {
 
                 val navController = rememberNavController()
+                var showSplash by remember { mutableStateOf(true) }
 
-                Scaffold(
-                    modifier = Modifier.fillMaxSize()
-                ) { innerPadding ->
+                if (showSplash) {
+                    SplashScreen {
+                        showSplash = false
+                    }
+                } else {
 
-                    NavHost(
-                        navController = navController,
-                        startDestination = "createJoin",
-                        modifier = Modifier.padding(innerPadding)
-                    ) {
+                    val navBackStackEntry by navController.currentBackStackEntryAsState()
+                    val currentRoute = navBackStackEntry?.destination?.route
 
-                        // CREATE / JOIN SCREEN
-                        composable("createJoin") {
-                            CreateJoinScreen(
-                                onCreateClick = {
-                                    navController.navigate("create")
-                                },
-                                onJoinValid = { code ->
-                                    navController.navigate("worker/$code")
-                                }
-                            )
-                        }
+                    val authScreens = listOf(
+                        "login",
+                        "create_account",
+                        "forgot_password",
+                        "authorization"
+                    )
 
-                        // CREATE SCREEN
-                        composable("create") {
-                            CreateScreen(
-                                onDoneClick = { code ->
-                                    navController.navigate("creator/$code")
-                                },
-                                onBackClick = {
-                                    navController.popBackStack()
-                                }
-                            )
-                        }
+                    val isAuthScreen = currentRoute == null || currentRoute in authScreens
 
-                        // WORKER SCREEN
-                        composable("worker/{code}") { backStackEntry ->
-                            val code = backStackEntry.arguments?.getString("code") ?: ""
-
-                            WorkerAssignmentScreen(
-                                sessionCode = code,
-                                onBack = {
-                                    //  goes back to CreateJoin screen safely
-                                    navController.popBackStack()
-                                }
-                            )
-                        }
-
-                        // CREATOR SCREEN
-                        composable("creator/{code}") { backStackEntry ->
-                            val code = backStackEntry.arguments?.getString("code") ?: ""
-
-                            CreatorAssignmentScreen(
-                                sessionCode = code,
-                                onBack = {
-                                    //  also returns properly instead of stacking screens
-                                    navController.popBackStack()
-                                }
-                            )
+                    if (isAuthScreen) {
+                        AppNavGraph(navController, PaddingValues(0.dp))
+                    } else {
+                        MainScreenWithFloatingMenu(navController) { padding ->
+                            AppNavGraph(navController, padding)
                         }
                     }
                 }
