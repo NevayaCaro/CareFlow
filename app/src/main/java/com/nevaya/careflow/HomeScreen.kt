@@ -20,9 +20,10 @@ fun HomeScreen(
         Column(
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(50.dp)
+                .padding(24.dp)
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+                .background(MaterialTheme.colorScheme.background),
+            verticalArrangement = Arrangement.Top
         ) {
 
             Text(
@@ -31,25 +32,92 @@ fun HomeScreen(
                 color = MaterialTheme.colorScheme.onBackground
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
+            // 1. Create or Join Group
             Text(
-                text = "Use the menu or shortcuts below to navigate.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                text = "Create or Join a Group",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Button(
-                onClick = { navController.navigate("assignments") },
+                onClick = { navController.navigate("createJoin") },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.secondary,
                     contentColor = MaterialTheme.colorScheme.onSecondary
                 )
             ) {
-                Text("View Assignments")
+                Text("Go to Create / Join")
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // 2. Worker Assignments (code required entry screen first)
+            Text(
+                text = "Worker Assignments",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                onClick = { navController.navigate("workerCodeEntry") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary
+                )
+            ) {
+                Text("Enter Code to Join Assignments")
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // 3. Creator Assignment Screen (code required)
+            Text(
+                text = "Creator View",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                onClick = { navController.navigate("creatorCodeEntry") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary
+                )
+            ) {
+                Text("Enter Code for Creator Access")
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // 4. Direct Create Group
+            Text(
+                text = "Create a Group",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                onClick = { navController.navigate("create") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary
+                )
+            ) {
+                Text("Create Group")
             }
         }
     }

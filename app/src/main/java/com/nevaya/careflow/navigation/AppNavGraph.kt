@@ -6,10 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.nevaya.careflow.SplashScreen
-import com.nevaya.careflow.screens.CreateJoinScreen
-import com.nevaya.careflow.screens.CreateScreen
-import com.nevaya.careflow.screens.CreatorAssignmentScreen
-import com.nevaya.careflow.screens.WorkerAssignmentScreen
+import com.nevaya.careflow.screens.*
 import com.nevaya.careflow.ui.screens.*
 
 @Composable
@@ -36,13 +33,16 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
             LoginScreen(
                 onForgotPassword = { navController.navigate("forgot_password") },
                 onCreateAccount = { navController.navigate("create_account") },
+
+
                 onLoginClick = {
-                    navController.navigate("createJoin") {
+                    navController.navigate("home") {
                         popUpTo("login") { inclusive = true }
                     }
                 },
+
                 onQuickLogin = {
-                    navController.navigate("createJoin") {
+                    navController.navigate("home") {
                         popUpTo("login") { inclusive = true }
                     }
                 }
@@ -69,7 +69,7 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
         composable("create_account") {
             CreateAccountScreen(
                 onSubmit = {
-                    navController.navigate("createJoin") {
+                    navController.navigate("home") {
                         popUpTo("create_account") { inclusive = true }
                     }
                 },
@@ -77,27 +77,56 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
             )
         }
 
-
+        // HOME (MAIN HUB)
+        composable("home") {
+            HomeScreen(
+                padding = padding,
+                navController = navController
+            )
+        }
         composable("createJoin") {
             CreateJoinScreen(
                 onCreateClick = {
                     navController.navigate("create")
                 },
-                onJoinValid = {
-                    navController.navigate("worker")
+                onJoinValid = { code ->
+                    navController.navigate("worker/$code")
+                },
+                onCreatorValid = { code ->
+                    navController.navigate("creator/$code")
                 }
             )
         }
 
-
+        // CREATE GROUP
         composable("create") {
             CreateScreen(
                 onDoneClick = { code ->
-                    navController.navigate("home") {
+                    navController.navigate("creator/$code") {
                         popUpTo("create") { inclusive = true }
                     }
                 },
                 onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        // WORKER ASSIGNMENT (CODE ROUTE)
+        composable("worker/{code}") { backStackEntry ->
+            val code = backStackEntry.arguments?.getString("code") ?: ""
+
+            WorkerAssignmentScreen(
+                sessionCode = code,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        // CREATOR ASSIGNMENT (CODE ROUTE)
+        composable("creator/{code}") { backStackEntry ->
+            val code = backStackEntry.arguments?.getString("code") ?: ""
+
+            CreatorAssignmentScreen(
+                sessionCode = code,
+                onBack = { navController.popBackStack() }
             )
         }
 
@@ -111,14 +140,6 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
             )
         }
 
-        // HOME
-        composable("home") {
-            HomeScreen(
-                padding = padding,
-                navController = navController
-            )
-        }
-
         // PATIENTS
         composable("patients") {
             PatientsScreen(navController)
@@ -126,7 +147,9 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
 
         // PATIENT CARD
         composable("patient_card/{roomNumber}") { backStackEntry ->
-            val roomNumber = backStackEntry.arguments?.getString("roomNumber")?.toInt() ?: 0
+            val roomNumber =
+                backStackEntry.arguments?.getString("roomNumber")?.toInt() ?: 0
+
             PatientCardScreen(navController, roomNumber)
         }
 
@@ -137,7 +160,6 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
                 navController = navController
             )
         }
-
 
         // MESSAGES
         composable("messages") {

@@ -26,7 +26,8 @@ import kotlinx.coroutines.delay
 fun CreateJoinScreen(
     modifier: Modifier = Modifier,
     onCreateClick: (String) -> Unit,
-    onJoinValid: (String) -> Unit
+    onJoinValid: (String) -> Unit,
+    onCreatorValid: (String) -> Unit
 ) {
 
     var showJoinField by remember { mutableStateOf(false) }
@@ -220,10 +221,27 @@ fun CreateJoinScreen(
 
                                                     "ENT" -> {
                                                         if (joinCode.length == 4) {
-                                                            val session = SessionStore.getSession(joinCode)
-                                                            if (session != null) onJoinValid(joinCode)
-                                                            else errorMessage = "Invalid code"
-                                                        } else errorMessage = "Enter 4-digit code"
+
+                                                            // check worker code first
+                                                            val workerSession = SessionStore.getSession(joinCode)
+
+                                                            if (workerSession != null) {
+                                                                onJoinValid(joinCode) // worker flow
+                                                            } else {
+
+                                                                // check creator code
+                                                                val creatorSession = SessionStore.getSessionByCreatorCode(joinCode)
+
+                                                                if (creatorSession != null) {
+                                                                    onJoinValid(creatorSession.code) // pass real session code
+                                                                } else {
+                                                                    errorMessage = "Invalid code"
+                                                                }
+                                                            }
+
+                                                        } else {
+                                                            errorMessage = "Enter 4-digit code"
+                                                        }
                                                     }
 
                                                     else ->
