@@ -77,7 +77,7 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
             )
         }
 
-        // ⭐ CREATE / JOIN SCREEN (ADDED)
+
         composable("createJoin") {
             CreateJoinScreen(
                 onCreateClick = {
@@ -89,7 +89,7 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
             )
         }
 
-        // ⭐ CREATE SCREEN (ADDED)
+
         composable("create") {
             CreateScreen(
                 onDoneClick = { code ->
