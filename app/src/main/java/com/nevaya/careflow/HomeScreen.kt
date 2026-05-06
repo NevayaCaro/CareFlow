@@ -75,7 +75,6 @@ fun HomeScreen(
             ) {
                 Text("Enter Code to Join Assignments")
             }
-
             Spacer(modifier = Modifier.height(24.dp))
 
             // 3. Creator Assignment Screen (code required)

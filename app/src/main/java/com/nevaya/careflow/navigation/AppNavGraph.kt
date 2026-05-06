@@ -110,7 +110,19 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
             )
         }
 
-        // WORKER ASSIGNMENT (CODE ROUTE)
+        // WORKER ENTRY (JOIN SCREEN FIRST)
+        composable("workerCodeEntry") {
+            JoinWorkerScreen(
+                onJoinValid = { code ->
+                    navController.navigate("worker/$code") {
+                        popUpTo("workerCodeEntry") { inclusive = true }
+                    }
+                },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+// WORKER ASSIGNMENT SCREEN
         composable("worker/{code}") { backStackEntry ->
             val code = backStackEntry.arguments?.getString("code") ?: ""
 
