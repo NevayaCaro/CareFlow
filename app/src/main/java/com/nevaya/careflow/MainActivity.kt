@@ -23,7 +23,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize()
                 ) { innerPadding ->
 
-                    // ⭐ AppNavGraph is now the ONLY NavHost in the app
+
                     AppNavGraph(
                         navController = navController,
                         padding = innerPadding
