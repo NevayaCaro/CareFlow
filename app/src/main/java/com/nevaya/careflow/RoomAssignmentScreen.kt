@@ -6,76 +6,79 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-
-
-
+import androidx.navigation.NavHostController
+import com.nevaya.careflow.ui.components.MainScreenWithFloatingMenu
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RoomAssignmentsScreen(padding: PaddingValues) {
+fun RoomAssignmentsScreen(
+    padding: PaddingValues,
+    navController: NavHostController
+) {
+    MainScreenWithFloatingMenu(navController) { innerPadding ->
 
-    Column(
-        modifier = Modifier
-            .padding(padding)
-            .padding(50.dp)
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-
-        // HEADER
-        Text(
-            "Assigned Rooms",
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.secondary   // DARK GREEN
-        )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        // ROOM 1
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .padding(50.dp)
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
         ) {
+
+            // HEADER
             Text(
-                "Room 204 – Fall Risk",
-                modifier = Modifier.padding(16.dp),
-                color = MaterialTheme.colorScheme.onSurface
+                "Assigned Rooms",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.secondary   // DARK GREEN
             )
-        }
 
-        Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-        // ROOM 2
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
-        ) {
-            Text(
-                "Room 210 – Assisted Mobility",
-                modifier = Modifier.padding(16.dp),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
+            // ROOM 1
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
+            ) {
+                Text(
+                    "Room 204 – Fall Risk",
+                    modifier = Modifier.padding(16.dp),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
 
-        Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-        // ROOM 3
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
-        ) {
-            Text(
-                "Room 215 – Medication Support",
-                modifier = Modifier.padding(16.dp),
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            // ROOM 2
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
+            ) {
+                Text(
+                    "Room 210 – Assisted Mobility",
+                    modifier = Modifier.padding(16.dp),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // ROOM 3
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
+            ) {
+                Text(
+                    "Room 215 – Medication Support",
+                    modifier = Modifier.padding(16.dp),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
         }
     }
-
 }

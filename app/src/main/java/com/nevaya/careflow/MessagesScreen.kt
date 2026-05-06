@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.nevaya.careflow.ui.components.MainScreenWithFloatingMenu
 
 data class Conversation(
     val id: String,
@@ -32,65 +33,68 @@ data class Conversation(
 @Composable
 fun MessagesScreen(navController: NavHostController, padding: PaddingValues) {
 
-    var searchQuery by remember { mutableStateOf("") }
+    MainScreenWithFloatingMenu(navController) { innerPadding ->
 
-    val conversations = listOf(
-        Conversation("1", "Nurse Admin", "Patient in Room 204 needs attention", "2:45 PM"),
-        Conversation("2", "Supervisor", "Shift change updated", "1:10 PM")
-    )
+        var searchQuery by remember { mutableStateOf("") }
 
-    val filteredConversations = conversations.filter {
-        it.name.contains(searchQuery, ignoreCase = true) ||
-                it.lastMessage.contains(searchQuery, ignoreCase = true)
-    }
+        val conversations = listOf(
+            Conversation("1", "Nurse Admin", "Patient in Room 204 needs attention", "2:45 PM"),
+            Conversation("2", "Supervisor", "Shift change updated", "1:10 PM")
+        )
 
-    Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { /* navController.navigate("new_message") */ },
-                containerColor = MaterialTheme.colorScheme.secondary,
-                contentColor = Color.White
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "New Message")
-            }
+        val filteredConversations = conversations.filter {
+            it.name.contains(searchQuery, ignoreCase = true) ||
+                    it.lastMessage.contains(searchQuery, ignoreCase = true)
         }
-    ) { innerPadding ->
 
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .padding(innerPadding)
-                .padding(10.dp)
-                .fillMaxSize()
-        ) {
-
-            Text(
-                "Messages",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.secondary
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Search conversations...") },
-                leadingIcon = {
-                    Icon(Icons.Default.Search, contentDescription = "Search")
+        Scaffold(
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = { /* navController.navigate("new_message") */ },
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    contentColor = Color.White
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "New Message")
                 }
-            )
+            }
+        ) { fabPadding ->
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .padding(fabPadding)
+                    .padding(10.dp)
+                    .fillMaxSize()
             ) {
-                items(filteredConversations) { convo ->
-                    ConversationRow(convo) {
-                        navController.navigate("chat/${convo.id}")
+
+                Text(
+                    "Messages",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("Search conversations...") },
+                    leadingIcon = {
+                        Icon(Icons.Default.Search, contentDescription = "Search")
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(filteredConversations) { convo ->
+                        ConversationRow(convo) {
+                            navController.navigate("chat/${convo.id}")
+                        }
                     }
                 }
             }
