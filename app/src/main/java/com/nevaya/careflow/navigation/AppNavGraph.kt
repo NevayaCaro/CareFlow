@@ -84,19 +84,6 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
                 navController = navController
             )
         }
-        composable("createJoin") {
-            CreateJoinScreen(
-                onCreateClick = {
-                    navController.navigate("create")
-                },
-                onJoinValid = { code ->
-                    navController.navigate("worker/$code")
-                },
-                onCreatorValid = { code ->
-                    navController.navigate("creator/$code")
-                }
-            )
-        }
 
         // CREATE GROUP
         composable("create") {

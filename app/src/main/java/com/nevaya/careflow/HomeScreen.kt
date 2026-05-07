@@ -34,29 +34,11 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // 1. Create or Join Group
-            Text(
-                text = "Create or Join a Group",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onBackground
-            )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Button(
-                onClick = { navController.navigate("createJoin") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary
-                )
-            ) {
-                Text("Go to Create / Join")
-            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 2. Worker Assignments (code required entry screen first)
+            // 1. Worker Assignments (code required entry screen first)
             Text(
                 text = "Worker Assignments",
                 style = MaterialTheme.typography.titleMedium,
@@ -77,7 +59,7 @@ fun HomeScreen(
             }
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 3. Creator Assignment Screen (code required)
+            // 2. Creator Assignment Screen (code required)
             Text(
                 text = "Creator View",
                 style = MaterialTheme.typography.titleMedium,
@@ -99,7 +81,7 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 4. Direct Create Group
+            // 3. Direct Create Group
             Text(
                 text = "Create a Group",
                 style = MaterialTheme.typography.titleMedium,
