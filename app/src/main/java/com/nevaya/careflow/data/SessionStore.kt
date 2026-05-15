@@ -1,16 +1,14 @@
 package com.nevaya.careflow.data
 
-import com.nevaya.careflow.data.NurseAssignment
-
-// This is in-memory "database"
 object SessionStore {
 
     private val sessions = mutableMapOf<String, Session>()
 
+    // Create session
     fun createSession(code: String): Session {
         val session = Session(
             code = code,
-            workerCode = "",
+            workerCode = code, // worker uses session code
             creatorCode = "",
             rooms = emptyList(),
             assignments = emptyList()
@@ -19,7 +17,13 @@ object SessionStore {
         return session
     }
 
+
     fun getSession(code: String): Session? {
         return sessions[code]
+    }
+
+
+    fun getSessionByCreatorCode(code: String): Session? {
+        return sessions.values.find { it.creatorCode == code }
     }
 }
