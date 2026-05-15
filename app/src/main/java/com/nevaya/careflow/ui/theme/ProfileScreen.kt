@@ -141,7 +141,7 @@ fun ProfileScreen(
                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)
                 )
 
-                // ⭐ PATIENTS BUTTON
+                // PATIENTS BUTTON
                 Button(
                     onClick = onViewPatients,
                     modifier = Modifier.fillMaxWidth(),
