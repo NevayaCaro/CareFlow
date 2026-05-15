@@ -10,9 +10,10 @@ data class Session(
 
     var rooms: List<Int> = emptyList(),
 
-    // NEW structured task lists
     var showerTasks: List<TaskItem> = emptyList(),
     var mealTasks: List<TaskItem> = emptyList(),
 
-    var assignments: List<NurseAssignment> = emptyList()
+    var assignments: List<NurseAssignment> = emptyList(),
+
+    var roomCharts: MutableMap<String, RoomChart> = mutableMapOf()
 )
