@@ -1,8 +1,8 @@
 package com.nevaya.careflow.data
 
-import com.nevaya.careflow.data.TaskItem
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 
-// session holds everything tied to a code
 data class Session(
     var code: String,
     var workerCode: String = "",
@@ -15,5 +15,10 @@ data class Session(
 
     var assignments: List<NurseAssignment> = emptyList(),
 
-    var roomCharts: MutableMap<String, RoomChart> = mutableMapOf()
+    // ACTIVE ROOM CHARTS
+    var roomCharts: MutableMap<String, RoomChart> = mutableMapOf(),
+
+    // SAVED ROOM SNAPSHOTS
+    var savedRoomCharts: SnapshotStateList<RoomChartSnapshot> =
+        mutableStateListOf()
 )
