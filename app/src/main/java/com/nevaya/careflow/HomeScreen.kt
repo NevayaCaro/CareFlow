@@ -40,7 +40,7 @@ fun HomeScreen(
 
             // 1. Worker Assignments (code required entry screen first)
             Text(
-                text = "Worker Assignments",
+                text = "Shift Board",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -61,7 +61,7 @@ fun HomeScreen(
 
             // 2. Creator Assignment Screen (code required)
             Text(
-                text = "Creator View",
+                text = "Shift Manager",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -83,7 +83,7 @@ fun HomeScreen(
 
             // 3. Direct Create Group
             Text(
-                text = "Create a Group",
+                text = "Shift Editor",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -98,7 +98,7 @@ fun HomeScreen(
                     contentColor = MaterialTheme.colorScheme.onSecondary
                 )
             ) {
-                Text("Create Group")
+                Text("Create A Group")
             }
         }
     }
