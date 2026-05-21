@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import com.nevaya.careflow.data.RoomChart
 import com.nevaya.careflow.data.RoomChartSnapshot
 
+
 @Composable
 fun WorkerAssignmentScreen(
     sessionCode: String,
@@ -52,6 +53,8 @@ fun WorkerAssignmentScreen(
 
     var selectedWorker by remember { mutableStateOf<NurseAssignment?>(null) }
     var selectedRoom by remember { mutableStateOf<Int?>(null) }
+    var viewMode by remember { mutableStateOf(false) }
+    var selectedSnapshot by remember { mutableStateOf<RoomChartSnapshot?>(null) }
 
     val assignments = session.assignments
 
@@ -304,16 +307,23 @@ fun WorkerAssignmentScreen(
 
                         val currentChart = session.roomCharts[roomKey] ?: return@Button
 
-                        session.savedRoomCharts.add(
-                            RoomChartSnapshot(
-                                roomId = roomKey,
-                                chart = currentChart.copy(
-                                    hygiene = mutableStateListOf(*currentChart.hygiene.toTypedArray()),
-                                    linen = mutableStateListOf(*currentChart.linen.toTypedArray()),
-                                    tasks = mutableStateListOf(*currentChart.tasks.toTypedArray())
-                                )
+                        val snapshot = RoomChartSnapshot(
+                            roomId = roomKey,
+                            chart = currentChart.copy(
+                                hygiene = mutableStateListOf(*currentChart.hygiene.toTypedArray()),
+                                linen = mutableStateListOf(*currentChart.linen.toTypedArray()),
+                                tasks = mutableStateListOf(*currentChart.tasks.toTypedArray())
                             )
                         )
+
+                        session.savedRoomCharts.add(snapshot)
+
+                        // RESET CURRENT WORK AREA (IMPORTANT)
+                        session.roomCharts[roomKey] = RoomChart(roomKey)
+
+                        selectedRoom = null
+                        selectedWorker = null
+                        selectedSnapshot = null
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary)
@@ -321,36 +331,118 @@ fun WorkerAssignmentScreen(
                     Text("Save Entry", color = Color.White)
                 }
 
+                if (viewMode && selectedRoom != null) {
+
+                    val roomKey = selectedRoom.toString()
+                    val snapshot = session.savedRoomCharts
+                        .lastOrNull { it.roomId == roomKey }
+
+                    selectedSnapshot?.let { snapshot ->
+
+                        val c = snapshot.chart
+
+                        fun formatList(title: String, list: List<String>): String {
+                            return if (list.isEmpty()) {
+                                "$title - None"
+                            } else {
+                                "$title - ${list.joinToString(", ")}"
+                            }
+                        }
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp)
+                        ) {
+
+                            Text(
+                                "ROOM ${snapshot.roomId} SUMMARY",
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = GreenDark
+                            )
+
+                            Spacer(Modifier.height(12.dp))
+
+                            // ================= FORMATTED SUMMARY =================
+                            SummaryCard(
+                                "Hygiene",
+                                if (c.hygiene.isEmpty()) "Hygiene - None"
+                                else "Hygiene - ${c.hygiene.joinToString(", ")}"
+                            )
+
+                            Spacer(Modifier.height(10.dp))
+
+                            SummaryCard(
+                                "Linen",
+                                if (c.linen.isEmpty()) "Linen - None"
+                                else "Linen - ${c.linen.joinToString(", ")}"
+                            )
+
+                            Spacer(Modifier.height(10.dp))
+
+                            SummaryCard(
+                                "Device",
+                                "Device - ${c.device ?: "None"}"
+                            )
+
+                            Spacer(Modifier.height(10.dp))
+
+                            SummaryCard(
+                                "Meals",
+                                """
+        Intake - ${c.mealIntake} ml
+        Output - ${c.mealOutputMl} ml
+        Eaten - ${c.mealPercentage}
+        """.trimIndent()
+                            )
+
+                            Spacer(Modifier.height(10.dp))
+
+                            SummaryCard(
+                                "Tasks",
+                                if (c.tasks.isEmpty()) "Tasks - None"
+                                else c.tasks.joinToString("\n") { "- $it" }
+                            )
+
+                            Spacer(Modifier.height(20.dp))
+
+                            Button(
+                                onClick = { selectedSnapshot = null },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Back")
+                            }
+                        }
+                    }
+                }
+
                 Spacer(Modifier.height(12.dp))
 
                 // SAVED
-                val savedForRoom = session.savedRoomCharts.filter { it.roomId == roomKey }
+                Text(
+                    text = "Saved Entries",
+                    modifier = Modifier.padding(16.dp),
+                    style = MaterialTheme.typography.titleMedium
+                )
 
-                Text("Saved Data")
+                val savedForRoom = session.savedRoomCharts
+                    .filter { it.roomId == roomKey }
+                    .reversed()
 
                 savedForRoom.forEach { snapshot ->
 
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 4.dp)
+                            .padding(vertical = 6.dp)
                             .clickable {
-
-                                // 1. Restore snapshot into active chart state
-                                session.roomCharts[roomKey] =
-                                    snapshot.chart.copy(
-                                        hygiene = mutableStateListOf(*snapshot.chart.hygiene.toTypedArray()),
-                                        linen = mutableStateListOf(*snapshot.chart.linen.toTypedArray()),
-                                        tasks = mutableStateListOf(*snapshot.chart.tasks.toTypedArray())
-                                    )
-
-                                // 2. Force UI back into room edit mode
-                                selectedRoom = room
-                            }
+                                selectedSnapshot = snapshot
+                            },
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF1F3F5))
                     ) {
                         Column(Modifier.padding(12.dp)) {
-                            Text("Saved Room ${snapshot.roomId}")
-                            Text("Tap to restore/edit")
+                            Text("Room ${snapshot.roomId}")
+                            Text("Tap to view details")
                         }
                     }
                 }
@@ -689,5 +781,20 @@ fun WorkerAssignmentScreen(
                     }
                 }
             }
+
         }
+@Composable
+fun SummaryCard(title: String, content: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF1F3F5)),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(Modifier.padding(12.dp)) {
+            Text(title, color = GreenDark, style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(6.dp))
+            Text(content, color = Color.Black)
+        }
+    }
+}
 
