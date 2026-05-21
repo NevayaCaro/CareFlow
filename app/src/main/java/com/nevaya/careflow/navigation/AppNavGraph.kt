@@ -119,6 +119,17 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
             )
         }
 
+        composable("creator_code") {
+            CreatorCodeScreen(
+                onBack = {
+                    navController.popBackStack()
+                },
+                onJoin = { sessionCode ->
+                    navController.navigate("creator_assignment/$sessionCode")
+                }
+            )
+        }
+
         // CREATOR ASSIGNMENT (CODE ROUTE)
         composable("creator/{code}") { backStackEntry ->
             val code = backStackEntry.arguments?.getString("code") ?: ""

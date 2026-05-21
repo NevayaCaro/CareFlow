@@ -1,25 +1,22 @@
 package com.nevaya.careflow.screens
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.nevaya.careflow.data.SessionStore
 import com.nevaya.careflow.ui.theme.GreenDark
 import com.nevaya.careflow.ui.theme.GreenPrimary
-import androidx.compose.foundation.background
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.foundation.lazy.items
 
 @Composable
 fun CreatorAssignmentScreen(
@@ -27,15 +24,17 @@ fun CreatorAssignmentScreen(
     onBack: () -> Unit
 ) {
 
-    val session = SessionStore.getSession(sessionCode)
-
-    if (session == null) {
-        Text("Invalid session code")
-        return
-    }
+    val session = SessionStore.getSessionByCreatorCode(sessionCode)
+        ?: SessionStore.getSession(sessionCode)
+        ?: run {
+            Text("Invalid session code")
+            return
+        }
 
     var selectedName by remember { mutableStateOf<String?>(null) }
-    val grouped = session.assignments.groupBy { it.name }
+
+    val assignments = session.assignments
+    val grouped = assignments.groupBy { it.name }
 
     Column(
         modifier = Modifier
@@ -43,7 +42,7 @@ fun CreatorAssignmentScreen(
             .background(Color(0xFFF4F6F8))
     ) {
 
-        //  TOP BAR
+        // ================= TOP BAR =================
         Surface(
             color = GreenPrimary,
             shadowElevation = 6.dp,
@@ -69,16 +68,10 @@ fun CreatorAssignmentScreen(
                     modifier = Modifier.align(Alignment.Center),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(
-                        "Shift Overview",
-                        color = Color.White,
-                        style = MaterialTheme.typography.titleLarge
-                    )
-
+                    Text("Shift Overview", color = Color.White)
                     Text(
                         "Code: ${session.code}",
-                        color = Color.White.copy(alpha = 0.85f),
-                        style = MaterialTheme.typography.bodySmall
+                        color = Color.White.copy(alpha = 0.85f)
                     )
                 }
             }
@@ -86,11 +79,11 @@ fun CreatorAssignmentScreen(
 
         Spacer(Modifier.height(20.dp))
 
+        // ================= LIST =================
         if (selectedName == null) {
 
-            // STAFF LIST (manager view)
             LazyColumn(
-                modifier = Modifier.padding(horizontal = 16.dp),
+                modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
 
@@ -101,19 +94,15 @@ fun CreatorAssignmentScreen(
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) { selectedName = name },
+                            .clickable { selectedName = name },
                         colors = CardDefaults.cardColors(containerColor = Color.White),
-                        shape = RoundedCornerShape(14.dp),
-                        elevation = CardDefaults.cardElevation(2.dp)
+                        shape = RoundedCornerShape(14.dp)
                     ) {
 
                         Column(Modifier.padding(16.dp)) {
 
                             Text(
-                                name,
+                                text = name,
                                 style = MaterialTheme.typography.titleMedium,
                                 color = GreenDark
                             )
@@ -121,18 +110,13 @@ fun CreatorAssignmentScreen(
                             Spacer(Modifier.height(4.dp))
 
                             Text(
-                                assignment?.role ?: "",
-                                color = Color.Gray,
-                                style = MaterialTheme.typography.bodySmall
+                                text = assignment?.role ?: "No role",
+                                color = Color.Gray
                             )
 
                             Spacer(Modifier.height(6.dp))
 
-                            Text(
-                                "Tap to view full assignment",
-                                color = Color.Gray,
-                                style = MaterialTheme.typography.bodySmall
-                            )
+                            Text("Tap to view assignment", color = Color.Gray)
                         }
                     }
                 }
@@ -140,67 +124,42 @@ fun CreatorAssignmentScreen(
 
         } else {
 
-            val assignment = grouped[selectedName]?.firstOrNull()
+            val assignment = grouped[selectedName]?.firstOrNull() ?: return@Column
 
-            val role = assignment?.role ?: "Unknown"
+            val rooms = assignment.rooms
+                .split(",")
+                .mapNotNull { it.trim().toIntOrNull() }
 
-            val rooms = assignment?.rooms
-                ?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }
-                ?: emptyList()
+            val showers = assignment.showers
+                .split(",")
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
 
-            val showers = assignment?.showers
-                ?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }
-                ?: emptyList()
+            val meals = assignment.meals
+                .split(",")
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
 
-            val meals = assignment?.meals
-                ?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }
-                ?: emptyList()
+            Column(Modifier.padding(16.dp)) {
 
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-
-                //  HEADER
-                Text(
-                    selectedName ?: "",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = GreenDark
-                )
-
-                Text(
-                    role,
-                    color = Color.Gray,
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                Text(selectedName ?: "", style = MaterialTheme.typography.headlineSmall)
+                Text(assignment.role, color = Color.Gray)
 
                 Spacer(Modifier.height(16.dp))
 
-                // ROOMS
-                InfoCard(
-                    title = "Rooms",
-                    content = rooms.joinToString(", ")
-                )
+                InfoCard("Rooms", rooms.joinToString(", "))
 
                 Spacer(Modifier.height(12.dp))
 
-                //  SHOWERS
-                InfoListCard(
-                    title = "Showers",
-                    items = showers.map { "Room $it" }
-                )
+                InfoListCard("Showers", showers.map { "Room $it" })
 
                 Spacer(Modifier.height(12.dp))
 
-                // MEALS
-                InfoListCard(
-                    title = "Meals",
-                    items = meals.map { "Room $it" }
-                )
+                InfoListCard("Meals", meals.map { "Room $it" })
             }
         }
     }
 }
-
 
 @Composable
 fun InfoCard(title: String, content: String) {
@@ -227,6 +186,7 @@ fun InfoListCard(title: String, items: List<String>) {
         Column(Modifier.padding(16.dp)) {
             Text(title, color = GreenPrimary)
             Spacer(Modifier.height(6.dp))
+
             items.forEach {
                 Text(it, color = Color.DarkGray)
             }

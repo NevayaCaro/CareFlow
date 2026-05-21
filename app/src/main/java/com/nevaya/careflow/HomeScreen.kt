@@ -69,7 +69,7 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Button(
-                onClick = { navController.navigate("creatorCodeEntry") },
+                onClick = { navController.navigate("creator_code") },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.secondary,
