@@ -11,15 +11,13 @@ import com.nevaya.careflow.screens.CreateScreen
 import com.nevaya.careflow.screens.CreatorAssignmentScreen
 import com.nevaya.careflow.screens.WorkerAssignmentScreen
 import com.nevaya.careflow.ui.screens.*
-import com.nevaya.careflow.ui.screens.NewMessageScreen
-
 
 @Composable
 fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
 
     NavHost(
         navController = navController,
-        startDestination = "messages"
+        startDestination = "login"
     ) {
 
         // SPLASH
@@ -79,7 +77,7 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
             )
         }
 
-        // CREATE / JOIN SCREEN
+
         composable("createJoin") {
             CreateJoinScreen(
                 onCreateClick = {
@@ -91,7 +89,7 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
             )
         }
 
-        // CREATE SCREEN
+
         composable("create") {
             CreateScreen(
                 onDoneClick = { code ->
@@ -140,14 +138,10 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
             )
         }
 
+
         // MESSAGES
         composable("messages") {
             MessagesScreen(navController, padding)
-        }
-
-        // ⭐ NEW MESSAGE SCREEN (ADDED)
-        composable("new_message") {
-            NewMessageScreen(navController)
         }
 
         // CHAT

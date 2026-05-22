@@ -303,12 +303,20 @@ fun CreateScreen(
 
                     Button(
                         onClick = {
-                            //keeps both codes and adds session data
 
-                            session.value.creatorCode = creatorCode.text
-                            session.value.workerCode = session.value.code
+                            if (creatorCode.text.length != 4) {
+                                errorMessage = "Creator code must be 4 digits"
+                                return@Button
+                            }
 
-                            // navigates to join code
+                            val sessionState = session.value
+
+                            // store creator + worker codes
+                            sessionState.creatorCode = creatorCode.text
+                            sessionState.workerCode = generatedCode
+                            sessionState.code = generatedCode
+
+                            // move forward with session code
                             onDoneClick(generatedCode)
                         },
                         colors = ButtonDefaults.buttonColors(
