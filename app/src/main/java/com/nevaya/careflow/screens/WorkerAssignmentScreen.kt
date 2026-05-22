@@ -207,6 +207,11 @@ fun WorkerAssignmentScreen(
                 .map { it.trim() }
                 .contains(room.toString())
 
+            val mealAssigned = worker.meals
+                .split(",")
+                .map { it.trim() }
+                .contains(room.toString())
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -239,6 +244,28 @@ fun WorkerAssignmentScreen(
                 ) {
                     Text(
                         text = if (showerAssigned) "SHOWER ASSIGNED" else "NO SHOWER ASSIGNED",
+                        modifier = Modifier.padding(14.dp)
+                    )
+                }
+
+                Spacer(Modifier.height(12.dp))
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor =
+                            if (mealAssigned)
+                                Color(0xFF4CAF50).copy(alpha = 0.15f)
+                            else
+                                Color.Red.copy(alpha = 0.12f)
+                    )
+                ) {
+                    Text(
+                        text =
+                            if (mealAssigned)
+                                "MEAL ASSIGNED"
+                            else
+                                "NO MEAL ASSIGNED",
                         modifier = Modifier.padding(14.dp)
                     )
                 }
