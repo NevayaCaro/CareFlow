@@ -6,7 +6,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.nevaya.careflow.SplashScreen
-import com.nevaya.careflow.screens.CreateJoinScreen
 import com.nevaya.careflow.screens.CreateScreen
 import com.nevaya.careflow.screens.CreatorAssignmentScreen
 import com.nevaya.careflow.screens.WorkerAssignmentScreen
@@ -37,12 +36,12 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
                 onForgotPassword = { navController.navigate("forgot_password") },
                 onCreateAccount = { navController.navigate("create_account") },
                 onLoginClick = {
-                    navController.navigate("createJoin") {
+                    navController.navigate("create") {
                         popUpTo("login") { inclusive = true }
                     }
                 },
                 onQuickLogin = {
-                    navController.navigate("createJoin") {
+                    navController.navigate("create") {
                         popUpTo("login") { inclusive = true }
                     }
                 }
@@ -78,16 +77,17 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
         }
 
 
-        composable("createJoin") {
-            CreateJoinScreen(
-                onCreateClick = {
-                    navController.navigate("create")
+        composable("create") {
+            CreateScreen(
+                onDoneClick = { code ->
+                    navController.navigate("home") {
+                        popUpTo("create") { inclusive = true }
+                    }
                 },
-                onJoinValid = {
-                    navController.navigate("worker")
-                }
+                onBackClick = { navController.popBackStack() }
             )
         }
+
 
 
         composable("create") {

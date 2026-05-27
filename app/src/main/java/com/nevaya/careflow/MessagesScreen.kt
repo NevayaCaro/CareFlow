@@ -31,6 +31,7 @@ import com.nevaya.careflow.data.ConversationData
 import com.nevaya.careflow.ui.components.MainScreenWithFloatingMenu
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.compose.material3.ripple
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -204,7 +205,7 @@ fun ConversationRow(
             }
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
-                indication = rememberRipple(color = MaterialTheme.colorScheme.secondary),
+                indication = ripple(),
                 onClick = onClick
             )
 
