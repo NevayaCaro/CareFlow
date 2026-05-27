@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "622560019265",
+    "project_id": "careflow-81b35",
+    "storage_bucket": "careflow-81b35.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:622560019265:android:41bbad9e86d0d670c717c0",
+        "android_client_info": {
+          "package_name": "com.nevaya.careflow"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_I73d-vbDX9n0tdxVL44yU4IK8vFnfXU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

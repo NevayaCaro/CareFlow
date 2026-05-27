@@ -7,27 +7,31 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.nevaya.careflow.SplashScreen
 import com.nevaya.careflow.screens.CreateScreen
-import com.nevaya.careflow.screens.CreatorAssignmentScreen
-import com.nevaya.careflow.screens.WorkerAssignmentScreen
+import com.nevaya.careflow.ui.onboarding.OnboardingPagerScreen
 import com.nevaya.careflow.ui.screens.*
 
 @Composable
-fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
+fun AppNavGraph(navController: NavHostController, padding: PaddingValues, startDestination: String) {
 
     NavHost(
         navController = navController,
-        startDestination = "login"
+        startDestination = "splash"
     ) {
 
         // SPLASH
         composable("splash") {
             SplashScreen(
                 onSplashFinished = {
-                    navController.navigate("login") {
+                    navController.navigate("onboarding") {
                         popUpTo("splash") { inclusive = true }
                     }
                 }
             )
+        }
+
+        // ONBOARDING (SLIDE SCREEN)
+        composable("onboarding") {
+            OnboardingPagerScreen(navController)
         }
 
         // LOGIN
@@ -68,7 +72,7 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
         composable("create_account") {
             CreateAccountScreen(
                 onSubmit = {
-                    navController.navigate("createJoin") {
+                    navController.navigate("create") {
                         popUpTo("create_account") { inclusive = true }
                     }
                 },
@@ -76,20 +80,7 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
             )
         }
 
-
-        composable("create") {
-            CreateScreen(
-                onDoneClick = { code ->
-                    navController.navigate("home") {
-                        popUpTo("create") { inclusive = true }
-                    }
-                },
-                onBackClick = { navController.popBackStack() }
-            )
-        }
-
-
-
+        // CREATE
         composable("create") {
             CreateScreen(
                 onDoneClick = { code ->
@@ -138,17 +129,23 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
             )
         }
 
-
         // MESSAGES
         composable("messages") {
             MessagesScreen(navController, padding)
         }
 
+        composable("new_message") {
+            NewMessageScreen(navController)
+        }
+
         // CHAT
-        composable("chat/{id}") { backStackEntry ->
+        composable(
+            route = "chat/{id}"
+        ) { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id") ?: ""
             ChatScreen(navController, id)
         }
+
 
         // SETTINGS
         composable("settings") {
@@ -170,3 +167,6 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
         composable("report_issue") { ReportIssueScreen(navController) }
     }
 }
+
+
+
