@@ -6,7 +6,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 data class Session(
     var code: String,
     var workerCode: String = "",
-    var creatorCode: String = "",
+    var creatorCode: String,
 
     var rooms: List<Int> = emptyList(),
 

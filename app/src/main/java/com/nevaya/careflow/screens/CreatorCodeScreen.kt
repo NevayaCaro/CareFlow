@@ -75,7 +75,9 @@ fun CreatorCodeScreen(
             OutlinedTextField(
                 value = creatorCode,
                 onValueChange = {
-                    creatorCode = it.take(4)
+                    if (it.length <= 4 && it.all(Char::isDigit)) {
+                        creatorCode = it
+                    }
                 },
                 label = {
                     Text("4 Digit Code")

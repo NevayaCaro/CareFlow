@@ -8,16 +8,22 @@ object SessionStore {
     var lastCreatorSessionCode: String? = null
 
 
-    fun createSession(code: String): Session {
+    fun createSession(
+        code: String,
+        workerCode: String = code,
+        creatorCode: String = code
+    ): Session {
+
         val session = Session(
             code = code,
-            workerCode = code,
-            creatorCode = code, // same code system (simplified + stable)
+            workerCode = workerCode,
+            creatorCode = creatorCode,
             rooms = emptyList(),
             assignments = emptyList()
         )
 
         sessions[code] = session
+
         return session
     }
 

@@ -44,12 +44,25 @@ fun CreateScreen(
     var lastRoom by remember { mutableStateOf("") }
     var roomsList by remember { mutableStateOf(listOf<Int>()) }
 
-    val generatedCode = remember { (1000..9999).random().toString() }
-    val session = remember(generatedCode) {
-        mutableStateOf(SessionStore.createSession(generatedCode))
+    val generatedCode = remember {
+        (1000..9999).random().toString()
     }
 
-    var creatorCode by remember { mutableStateOf(TextFieldValue("")) }
+    val generatedCreatorCode = remember {
+        (1000..9999).random().toString()
+    }
+
+    val session = remember(generatedCode) {
+        mutableStateOf(
+            SessionStore.createSession(
+                code = generatedCode,
+                workerCode = generatedCode,
+                creatorCode = generatedCreatorCode
+            )
+        )
+    }
+
+
     var activeRoomField by remember { mutableStateOf(1) }
 
     // HELP STATE
@@ -180,20 +193,18 @@ fun CreateScreen(
                                 color = TextPrimary
                             )
 
-                            OutlinedTextField(
-                                value = creatorCode,
-                                onValueChange = {
-                                    if (it.text.length <= 4 && it.text.all { c -> c.isDigit() }) {
-                                        creatorCode = it
-                                    }
-                                },
-                                label = { Text("Enter 4-digit code") },
-                                singleLine = true,
-                                modifier = Modifier.fillMaxWidth()
-                            )
+                            Spacer(modifier = Modifier.height(12.dp))
 
                             Text(
-                                text = "Make a code to gain creator access. Workers use the session code.",
+                                text = generatedCreatorCode,
+                                fontSize = 34.sp,
+                                color = TextPrimary
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = "Use this code for creator/admin access.",
                                 fontSize = 12.sp,
                                 color = TextPrimary
                             )
@@ -272,6 +283,14 @@ fun CreateScreen(
                                             nurseName = TextFieldValue(assignment.name)
                                             showersText = TextFieldValue(assignment.showers)
                                             mealsText = TextFieldValue(assignment.meals)
+
+                                            selectedRooms = assignment.rooms
+                                                .split(", ")
+                                                .mapNotNull { it.toIntOrNull() }
+                                                .toSet()
+
+                                            selectedRole = assignment.role
+
                                             editIndex = index
                                             currentStep = 2
                                         },
@@ -304,19 +323,15 @@ fun CreateScreen(
                     Button(
                         onClick = {
 
-                            if (creatorCode.text.length != 4) {
-                                errorMessage = "Creator code must be 4 digits"
-                                return@Button
-                            }
-
                             val sessionState = session.value
 
-                            // store creator + worker codes
-                            sessionState.creatorCode = creatorCode.text
+                            sessionState.creatorCode = generatedCreatorCode
                             sessionState.workerCode = generatedCode
                             sessionState.code = generatedCode
 
-                            // move forward with session code
+                            sessionState.assignments = assignments
+                            sessionState.rooms = roomsList
+
                             onDoneClick(generatedCode)
                         },
                         colors = ButtonDefaults.buttonColors(
@@ -715,6 +730,7 @@ fun CreateScreen(
 
                             session.assignments = updatedAssignments
                             assignments = updatedAssignments
+                            session.rooms = roomsList
 
                             currentStep = 1
                         },

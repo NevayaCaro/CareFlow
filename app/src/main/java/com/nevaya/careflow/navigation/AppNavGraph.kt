@@ -125,7 +125,7 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
                     navController.popBackStack()
                 },
                 onJoin = { sessionCode ->
-                    navController.navigate("creator_assignment/$sessionCode")
+                    navController.navigate("creator/$sessionCode")
                 }
             )
         }
