@@ -18,25 +18,12 @@ import com.nevaya.careflow.data.SessionStore
 import com.nevaya.careflow.data.NurseAssignment
 import com.nevaya.careflow.ui.theme.GreenPrimary
 import com.nevaya.careflow.ui.theme.GreenDark
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.unit.dp
-import androidx.compose.material3.*
-import androidx.compose.ui.text.style.TextAlign
 import com.nevaya.careflow.data.RoomChart
 import com.nevaya.careflow.data.RoomChartSnapshot
-
+import com.nevaya.careflow.data.LiveActivity
 
 @Composable
 fun WorkerAssignmentScreen(
@@ -345,7 +332,26 @@ fun WorkerAssignmentScreen(
 
                         session.savedRoomCharts.add(snapshot)
 
-                        // RESET CURRENT WORK AREA (IMPORTANT)
+                        session.liveActivities.add(
+                            LiveActivity(
+                                workerName = worker.name,
+                                roomId = roomKey,
+                                message = buildString {
+                                    append("Updated Room $roomKey: ")
+
+                                    if (currentChart.hygiene.isNotEmpty())
+                                        append("Hygiene ")
+
+                                    if (currentChart.linen.isNotEmpty())
+                                        append("| Linen ")
+
+                                    if (currentChart.tasks.isNotEmpty())
+                                        append("| Tasks updated")
+                                }
+                            )
+                        )
+
+                        // RESET CURRENT WORK AREA
                         session.roomCharts[roomKey] = RoomChart(roomKey)
 
                         selectedRoom = null

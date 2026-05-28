@@ -2,6 +2,9 @@ package com.nevaya.careflow.data
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import com.nevaya.careflow.data.LiveActivity
+
+
 
 data class Session(
     var code: String,
@@ -20,5 +23,10 @@ data class Session(
 
     // SAVED ROOM SNAPSHOTS
     var savedRoomCharts: SnapshotStateList<RoomChartSnapshot> =
+        mutableStateListOf(),
+
+    var liveActivities: SnapshotStateList<LiveActivity> =
+        mutableStateListOf(),
+    val liveFeed: SnapshotStateList<LiveActivity> =
         mutableStateListOf()
 )
