@@ -90,7 +90,7 @@ fun MainScreenWithFloatingMenu(
                             menuExpanded = false
                         }
                         FloatingMenuItem("Room Assignments", Icons.AutoMirrored.Filled.List) {
-                            navController.navigate("assignments")
+                            navController.navigate("workerCodeEntry")
                             menuExpanded = false
                         }
                         FloatingMenuItem("Messages", Icons.Default.Email) {

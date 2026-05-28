@@ -11,9 +11,7 @@ data class RoomChart(
     var tasks: SnapshotStateList<String> = mutableStateListOf(),
 
     var device: String? = null,
-
     var deviceComment: String = "",
-
     var comment: String = "",
 
     var mealIntake: String = "",

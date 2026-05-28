@@ -4,25 +4,45 @@ object SessionStore {
 
     private val sessions = mutableMapOf<String, Session>()
 
-    // Create session
-    fun createSession(code: String): Session {
+    // optional: remembers last opened creator session
+    var lastCreatorSessionCode: String? = null
+
+
+    fun createSession(
+        code: String,
+        workerCode: String = code,
+        creatorCode: String = code
+    ): Session {
+
         val session = Session(
             code = code,
-            workerCode = code, // worker uses session code
-            creatorCode = "",
+            workerCode = workerCode,
+            creatorCode = creatorCode,
             rooms = emptyList(),
             assignments = emptyList()
         )
+
         sessions[code] = session
+
         return session
     }
 
 
-    fun getSession(code: String): Session? {
+    fun getSession(code: String?): Session? {
+        if (code == null) return null
         return sessions[code]
     }
 
 
+    fun getCreatorSession(code: String?): Session? {
+        val finalCode = code ?: lastCreatorSessionCode
+        return sessions[finalCode]
+    }
+
+
+    fun getWorkerSession(code: String): Session? {
+        return sessions[code]
+    }
     fun getSessionByCreatorCode(code: String): Session? {
         return sessions.values.find { it.creatorCode == code }
     }
