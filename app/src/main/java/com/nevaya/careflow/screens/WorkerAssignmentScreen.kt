@@ -351,7 +351,7 @@ fun WorkerAssignmentScreen(
                             )
                         )
 
-                        // RESET CURRENT WORK AREA
+
                         session.roomCharts[roomKey] = RoomChart(roomKey)
 
                         selectedRoom = null

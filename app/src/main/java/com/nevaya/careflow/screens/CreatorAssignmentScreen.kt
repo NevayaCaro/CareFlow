@@ -162,7 +162,7 @@ fun CreatorAssignmentScreen(
                 .padding(horizontal = 16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary)
         ) {
-            Text("➕ Add New Member", color = Color.White)
+            Text("+ Add New Member", color = Color.White)
         }
 
         // ================= ADD / EDIT FORM =================
