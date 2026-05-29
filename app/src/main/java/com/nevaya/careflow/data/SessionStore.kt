@@ -1,35 +1,49 @@
 package com.nevaya.careflow.data
 
-import com.nevaya.careflow.data.NurseAssignment
-
-
-// This is your data container (what gets saved per code)
-data class Session(
-    var code: String,
-    var workerCode: String = "",
-    var creatorCode: String = "",
-    var rooms: List<Int> = emptyList(),
-    var assignments: List<NurseAssignment> = emptyList()
-)
-
-// This is in-memory "database"
 object SessionStore {
 
     private val sessions = mutableMapOf<String, Session>()
 
-    fun createSession(code: String): Session {
+    // optional: remembers last opened creator session
+    var lastCreatorSessionCode: String? = null
+
+
+    fun createSession(
+        code: String,
+        workerCode: String = code,
+        creatorCode: String = code
+    ): Session {
+
         val session = Session(
             code = code,
-            workerCode = "",
-            creatorCode = "",
+            workerCode = workerCode,
+            creatorCode = creatorCode,
             rooms = emptyList(),
             assignments = emptyList()
         )
+
         sessions[code] = session
+
         return session
     }
 
-    fun getSession(code: String): Session? {
+
+    fun getSession(code: String?): Session? {
+        if (code == null) return null
         return sessions[code]
+    }
+
+
+    fun getCreatorSession(code: String?): Session? {
+        val finalCode = code ?: lastCreatorSessionCode
+        return sessions[finalCode]
+    }
+
+
+    fun getWorkerSession(code: String): Session? {
+        return sessions[code]
+    }
+    fun getSessionByCreatorCode(code: String): Session? {
+        return sessions.values.find { it.creatorCode == code }
     }
 }

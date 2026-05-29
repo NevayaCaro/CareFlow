@@ -3,9 +3,9 @@ package com.nevaya.careflow.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,22 +16,15 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.nevaya.careflow.ui.theme.*
 import com.nevaya.careflow.data.SessionStore
-import androidx.compose.ui.text.input.KeyboardType
+import com.nevaya.careflow.data.NurseAssignment
+import com.nevaya.careflow.data.TaskItem
 
-// Nurse assignment data
-data class NurseAssignment(
-    var name: String,
-    var role: String,
-    var rooms: String,
-    var showers: String,
-    var meals: String
 
-)
 
 @Composable
 fun CreateScreen(
     modifier: Modifier = Modifier,
-    onDoneClick: () -> Unit,
+    onDoneClick: (String) -> Unit,
     onBackClick: () -> Unit
 ) {
     var currentStep by remember { mutableStateOf(1) }
@@ -44,19 +37,36 @@ fun CreateScreen(
     var editIndex by remember { mutableStateOf<Int?>(null) }
     var selectedRooms by remember { mutableStateOf(setOf<Int>()) }
     var selectedRole by remember { mutableStateOf("CNA") }
-
+    var errorMessage by remember { mutableStateOf("") }
 
     // Step 3: Rooms
     var firstRoom by remember { mutableStateOf("") }
     var lastRoom by remember { mutableStateOf("") }
     var roomsList by remember { mutableStateOf(listOf<Int>()) }
 
-    val generatedCode = remember { (1000..9999).random().toString() }
-    val session = remember(generatedCode) {
-        mutableStateOf(SessionStore.createSession(generatedCode))
+    val generatedCode = remember {
+        (1000..9999).random().toString()
     }
-    var creatorCode by remember { mutableStateOf(TextFieldValue("")) }
+
+    val generatedCreatorCode = remember {
+        (1000..9999).random().toString()
+    }
+
+    val session = remember(generatedCode) {
+        mutableStateOf(
+            SessionStore.createSession(
+                code = generatedCode,
+                workerCode = generatedCode,
+                creatorCode = generatedCreatorCode
+            )
+        )
+    }
+
+
     var activeRoomField by remember { mutableStateOf(1) }
+
+    // HELP STATE
+    var showHelp by remember { mutableStateOf(false) }
 
     Box(
         modifier = modifier
@@ -64,7 +74,7 @@ fun CreateScreen(
             .background(AppBackground)
     ) {
 
-        // TOP BACK BUTTON (for all steps except step 1)
+        // TOP BACK BUTTON
         Button(
             onClick = {
                 if (currentStep == 1) {
@@ -80,19 +90,82 @@ fun CreateScreen(
         ) {
             Text("Back", color = MaterialTheme.colorScheme.onPrimary)
         }
-        // CODE TOP RIGHT
-        Text(
-            text = "CODE: $generatedCode",
-            color = TextPrimary,
-            fontSize = 22.sp,
+
+        // TOP RIGHT CODE + INFO BUTTON
+        Row(
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .zIndex(10f)
-        )
+                .zIndex(10f),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            // CLEAN BUBBLE INFO BUTTON
+            Surface(
+                shape = CircleShape,
+                color = GreenDark,
+                tonalElevation = 4.dp,
+                modifier = Modifier.size(38.dp)
+            ) {
+                IconButton(
+                    onClick = { showHelp = !showHelp }
+                ) {
+                    Text(
+                        text = "i",
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontSize = 16.sp
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Text(
+                text = "CODE: $generatedCode",
+                color = TextPrimary,
+                fontSize = 22.sp
+            )
+        }
+
+        // HELP POPUP
+        if (showHelp) {
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = GreenPrimary),
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 60.dp, end = 16.dp)
+                    .width(260.dp)
+                    .zIndex(20f)
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+
+                    Text(
+                        text = "How this screen works:",
+                        fontSize = 14.sp,
+                        color = TextPrimary
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Text(
+                        text =
+                            " Start in Rooms, enter a first and last room range.\n" +
+                                    " Press Done to generate the room list.\n" +
+                                    " Go to Assign to add a worker and name them.\n" +
+                                    " Select their role and assign specific rooms/tasks.\n" +
+                                    " You can edit or delete assignments from this screen once added in Assign.\n" +
+                                    " Press Done in Assign to save and return to this screen.\n" +
+                                    " Once you press Done on this screen,\n" +
+                                    " it'll transfer you to your assignment screen (Creator Assignment Screen)",
+                        fontSize = 12.sp,
+                        color = TextPrimary
+                    )
+                }
+            }
+        }
 
         when (currentStep) {
 
-            // STEP 1: ASSIGN + ROOMS BUTTON
             1 -> {
                 Column(
                     modifier = Modifier
@@ -102,13 +175,11 @@ fun CreateScreen(
                     verticalArrangement = Arrangement.spacedBy(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    //creator code maker
+
                     Card(
                         shape = RoundedCornerShape(22.dp),
                         colors = CardDefaults.cardColors(containerColor = GreenPrimary),
-                        modifier = Modifier
-                            .width(320.dp)
-                            .align(Alignment.CenterHorizontally)
+                        modifier = Modifier.width(320.dp)
                     ) {
                         Column(
                             modifier = Modifier.padding(16.dp),
@@ -122,59 +193,47 @@ fun CreateScreen(
                                 color = TextPrimary
                             )
 
-                            OutlinedTextField(
-                                value = creatorCode,
-                                onValueChange = {
-                                    if (it.text.length <= 4 && it.text.all { c -> c.isDigit() }) {
-                                        creatorCode = it
-                                    }
-                                },
-                                label = { Text("Enter 4-digit code") },
-                                singleLine = true,
-                                modifier = Modifier.fillMaxWidth()
-                            )
+                            Spacer(modifier = Modifier.height(12.dp))
 
                             Text(
-                                text = "Make a code to gain access to this created screen when you return from join. Workers use the top-right code to enter worker view, while this code is for creator access only.",
+                                text = generatedCreatorCode,
+                                fontSize = 34.sp,
+                                color = TextPrimary
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = "Use this code for creator/admin access.",
                                 fontSize = 12.sp,
                                 color = TextPrimary
                             )
                         }
                     }
-                    // CARD BEHIND BUTTONS
+
                     Card(
                         shape = RoundedCornerShape(22.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = GreenPrimary,           // card background
-                            contentColor = MaterialTheme.colorScheme.onPrimary // white text/icons inside
-                        ),
-                        modifier = Modifier
-                            .width(320.dp)
-                            .align(Alignment.CenterHorizontally)
+                        colors = CardDefaults.cardColors(containerColor = GreenPrimary),
+                        modifier = Modifier.width(320.dp)
                     ) {
                         Column(
                             modifier = Modifier.padding(32.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
 
-                            // ROOMS BUTTON
                             Button(
-                                onClick = { currentStep = 3 }, // navigate to rooms step
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = GreenDark,                // dark green button
-                                    contentColor = MaterialTheme.colorScheme.onPrimary // white text
-                                ),
+                                onClick = { currentStep = 3 },
+                                colors = ButtonDefaults.buttonColors(containerColor = GreenDark),
                                 shape = RoundedCornerShape(50.dp),
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(45.dp)
                             ) {
-                                Text(text = "Rooms")
+                                Text("Rooms")
                             }
 
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            // ASSIGN BUTTON
                             Button(
                                 onClick = {
                                     nurseName = TextFieldValue("")
@@ -183,18 +242,14 @@ fun CreateScreen(
                                     editIndex = null
                                     currentStep = 2
                                 },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = GreenDark,                // dark green button
-                                    contentColor = MaterialTheme.colorScheme.onPrimary // white text
-                                ),
+                                colors = ButtonDefaults.buttonColors(containerColor = GreenDark),
                                 shape = RoundedCornerShape(50.dp),
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(45.dp)
                             ) {
-                                Text(text = "Assign")
+                                Text("Assign")
                             }
-
                         }
                     }
                     // ASSIGNMENT LIST
@@ -228,6 +283,14 @@ fun CreateScreen(
                                             nurseName = TextFieldValue(assignment.name)
                                             showersText = TextFieldValue(assignment.showers)
                                             mealsText = TextFieldValue(assignment.meals)
+
+                                            selectedRooms = assignment.rooms
+                                                .split(", ")
+                                                .mapNotNull { it.toIntOrNull() }
+                                                .toSet()
+
+                                            selectedRole = assignment.role
+
                                             editIndex = index
                                             currentStep = 2
                                         },
@@ -256,16 +319,20 @@ fun CreateScreen(
                         }
                     }
                     Spacer(modifier = Modifier.height(24.dp))
-
+                   //SAVES CURRENT SESSION WITH CREATOR AND WORKER CODE
                     Button(
                         onClick = {
-                            //keeps both codes and adds session data
 
-                            session.value.creatorCode = creatorCode.text
-                            session.value.workerCode = session.value.code
+                            val sessionState = session.value
 
-                            // navigates to join code
-                            onDoneClick()
+                            sessionState.creatorCode = generatedCreatorCode
+                            sessionState.workerCode = generatedCode
+                            sessionState.code = generatedCode
+
+                            sessionState.assignments = assignments
+                            sessionState.rooms = roomsList
+
+                            onDoneClick(generatedCode)
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = GreenDark,
@@ -284,148 +351,158 @@ fun CreateScreen(
             3 -> {
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.Center)
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(top = 80.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
-                    // CARD BEHIND INPUTS
+                    // MAIN CONTAINER
                     Card(
                         shape = RoundedCornerShape(22.dp),
                         colors = CardDefaults.cardColors(containerColor = GreenPrimary),
                         modifier = Modifier
-                            .fillMaxWidth(0.95f)
-                            .wrapContentHeight()
-                            .padding(vertical = 16.dp)
+                            .width(340.dp)
                     ) {
-                        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            // FIRST ROOM
-                            OutlinedTextField(
-                                value = firstRoom,
-                                onValueChange = {},
-                                readOnly = true,
-                                label = { Text("First Room Number", color = TextPrimary) },
-                                singleLine = true,
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = OutlinedTextFieldDefaults.colors()
+
+                        Column(
+                            modifier = Modifier.padding(20.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+
+                            // INPUT DISPLAY AREA
+                            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+
+                                OutlinedTextField(
+                                    value = firstRoom,
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    label = { Text("First Room") },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+
+                                OutlinedTextField(
+                                    value = lastRoom,
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    label = { Text("Last Room") },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(14.dp))
+
+                            Text(
+                                text = if (activeRoomField == 1) "Enter First Room" else "Enter Last Room",
+                                color = TextPrimary
                             )
-                            // LAST ROOM
-                            OutlinedTextField(
-                                value = lastRoom,
-                                onValueChange = {},
-                                readOnly = true,
-                                label = { Text("Last Room Number", color = TextPrimary) },
-                                singleLine = true,
-                                modifier = Modifier.fillMaxWidth()
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            // KEYPAD
+                            val buttons = listOf(
+                                listOf("1", "2", "3"),
+                                listOf("4", "5", "6"),
+                                listOf("7", "8", "9"),
+                                listOf("DEL", "0", "NEXT")
                             )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(12.dp))
 
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                buttons.forEach { row ->
+                                    Row {
+                                        row.forEach { label ->
 
-                        Text(
-                            text = if (activeRoomField == 1) "Entering First Room" else "Entering Last Room",
-                            color = TextPrimary
-                        )
+                                            ElevatedButton(
+                                                onClick = {
 
-                        val buttons = listOf(
-                            listOf("1", "2", "3"),
-                            listOf("4", "5", "6"),
-                            listOf("7", "8", "9"),
-                            listOf("DEL", "0", "NEXT")
-                        )
+                                                    val current =
+                                                        if (activeRoomField == 1) firstRoom else lastRoom
 
-                        buttons.forEach { row ->
-                            Row {
-                                row.forEach { label ->
+                                                    when (label) {
 
-                                    Button(
-                                        onClick = {
+                                                        "DEL" -> {
+                                                            val updated = current.dropLast(1)
+                                                            if (activeRoomField == 1) firstRoom = updated else lastRoom =
+                                                                updated
+                                                        }
 
-                                            val current = if (activeRoomField == 1) firstRoom else lastRoom
+                                                        "NEXT" -> {
+                                                            activeRoomField =
+                                                                if (activeRoomField == 1) 2 else 1
+                                                        }
 
-                                            when (label) {
-
-                                                "DEL" -> {
-                                                    val updated = current.dropLast(1)
-                                                    if (activeRoomField == 1) firstRoom = updated else lastRoom = updated
-                                                }
-
-                                                "NEXT" -> {
-                                                    activeRoomField = if (activeRoomField == 1) 2 else 1
-                                                }
-
-                                                else -> {
-                                                    if (current.length < 4) {
-                                                        val updated = current + label
-                                                        if (activeRoomField == 1) firstRoom = updated else lastRoom = updated
+                                                        else -> {
+                                                            if (current.length < 4) {
+                                                                val updated = current + label
+                                                                if (activeRoomField == 1) firstRoom =
+                                                                    updated else lastRoom = updated
+                                                            }
+                                                        }
                                                     }
-                                                }
+                                                },
+                                                modifier = Modifier
+                                                    .padding(6.dp)
+                                                    .size(70.dp),
+                                                shape = RoundedCornerShape(16.dp),
+                                                colors = ButtonDefaults.elevatedButtonColors(
+                                                    containerColor = GreenDark,
+                                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                                )
+                                            ) {
+                                                Text(label)
                                             }
-                                        },
-                                        modifier = Modifier
-                                            .padding(6.dp)
-                                            .size(70.dp)
-                                    ) {
-                                        Text(label)
+                                        }
                                     }
                                 }
                             }
-                        }
-                    }
 
-                    // CARD BEHIND BUTTONS
-                    Card(
-                        shape = RoundedCornerShape(22.dp),
-                        colors = CardDefaults.cardColors(containerColor = GreenPrimary),
-                        modifier = Modifier
-                            .fillMaxWidth(0.95f)
-                            .wrapContentHeight()
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            // DELETE BUTTON
-                            Button(
-                                onClick = {
-                                    firstRoom = ""
-                                    lastRoom = ""
-                                    roomsList = emptyList()
-                                    activeRoomField = 1
-                                },
-                                colors = ButtonDefaults.buttonColors(containerColor = GreenDark),
-                                modifier = Modifier.weight(1f)
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            // ACTION BUTTONS ROW
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text("Delete", color = MaterialTheme.colorScheme.onPrimary)
-                            }
 
-                            Spacer(modifier = Modifier.width(16.dp))
+                                Button(
+                                    onClick = {
+                                        firstRoom = ""
+                                        lastRoom = ""
+                                        roomsList = emptyList()
+                                        activeRoomField = 1
+                                    },
+                                    colors = ButtonDefaults.buttonColors(containerColor = GreenDark),
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text("Clear")
+                                }
 
-                            // DONE BUTTON
-                            Button(
-                                onClick = {
-                                    val start = firstRoom.toIntOrNull()
-                                    val end = lastRoom.toIntOrNull()
+                                Spacer(modifier = Modifier.width(12.dp))
 
-                                    roomsList = if (start != null && end != null && end >= start) {
-                                        (start..end).toList()
-                                    } else {
-                                        emptyList()
-                                    }
+                                Button(
+                                    onClick = {
 
-                                    session.value.rooms = roomsList
-                                    currentStep = 1
-                                },
-                                colors = ButtonDefaults.buttonColors(containerColor = GreenDark),
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Text("Done", color = MaterialTheme.colorScheme.onPrimary)
+                                        val start = firstRoom.toIntOrNull()
+                                        val end = lastRoom.toIntOrNull()
+
+                                        roomsList =
+                                            if (start != null && end != null && end >= start) {
+                                                (start..end).toList()
+                                            } else emptyList()
+
+                                        val sessionValue = session.value
+
+                                        sessionValue.rooms = roomsList
+                                        sessionValue.showerTasks = roomsList.map { TaskItem(it) }
+                                        sessionValue.mealTasks = roomsList.map { TaskItem(it) }
+
+                                        currentStep = 1
+                                    },
+                                    colors = ButtonDefaults.buttonColors(containerColor = GreenDark),
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text("Done")
+                                }
                             }
                         }
                     }
@@ -628,6 +705,12 @@ fun CreateScreen(
 
                     Button(
                         onClick = {
+
+                            val session = SessionStore.getSession(generatedCode) ?: run {
+                                errorMessage = "Session missing"
+                                return@Button
+                            }
+
                             val newAssignment = NurseAssignment(
                                 name = nurseName.text,
                                 role = selectedRole,
@@ -636,13 +719,18 @@ fun CreateScreen(
                                 meals = mealsText.text
                             )
 
-                            if (editIndex != null) {
-                                assignments = assignments.toMutableList().also {
-                                    it[editIndex!!] = newAssignment
+                            val updatedAssignments =
+                                if (editIndex != null) {
+                                    assignments.toMutableList().also {
+                                        it[editIndex!!] = newAssignment
+                                    }
+                                } else {
+                                    assignments + newAssignment
                                 }
-                            } else {
-                                assignments = assignments + newAssignment
-                            }
+
+                            session.assignments = updatedAssignments
+                            assignments = updatedAssignments
+                            session.rooms = roomsList
 
                             currentStep = 1
                         },
