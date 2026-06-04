@@ -15,7 +15,7 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues, startD
 
     NavHost(
         navController = navController,
-        startDestination = "splash"
+        startDestination = "Home"
     ) {
 
         // SPLASH
@@ -146,6 +146,10 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues, startD
         // PATIENTS
         composable("patients") {
             PatientsScreen(navController)
+        }
+
+        composable("add_patient") {
+            AddPatientScreen(navController)
         }
 
         // PATIENT CARD
