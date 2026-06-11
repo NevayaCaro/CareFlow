@@ -42,6 +42,7 @@ fun WorkerAssignmentScreen(
     var selectedRoom by remember { mutableStateOf<Int?>(null) }
     var viewMode by remember { mutableStateOf(false) }
     var selectedSnapshot by remember { mutableStateOf<RoomChartSnapshot?>(null) }
+    var showSavedEntries by remember { mutableStateOf(false) }
 
     val assignments = session.assignments
 
@@ -175,9 +176,131 @@ fun WorkerAssignmentScreen(
             }
         }
 
+        if (viewMode && selectedSnapshot != null) {
+
+            val c = selectedSnapshot!!.chart
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+
+                Text(
+                    text = "ROOM ${selectedSnapshot!!.roomId} SUMMARY",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = GreenDark
+                )
+
+                Spacer(Modifier.height(12.dp))
+
+                Text("Hygiene: ${if (c.hygiene.isEmpty()) "None" else c.hygiene.joinToString(", ")}")
+
+                Spacer(Modifier.height(8.dp))
+
+                Text("Linen: ${if (c.linen.isEmpty()) "None" else c.linen.joinToString(", ")}")
+
+                Spacer(Modifier.height(8.dp))
+
+                Text("Device: ${c.device ?: "None"}")
+
+                Spacer(Modifier.height(8.dp))
+
+                Text("Intake: ${c.mealIntake}")
+
+                Text("Output: ${c.mealOutputMl}")
+
+                Text("Eaten: ${c.mealPercentage}")
+
+                Spacer(Modifier.height(8.dp))
+
+                Text(
+                    "Tasks: ${
+                        if (c.tasks.isEmpty())
+                            "None"
+                        else
+                            c.tasks.joinToString(", ")
+                    }"
+                )
+
+                Spacer(Modifier.height(20.dp))
+
+                Button(
+                    onClick = {
+                        selectedSnapshot = null
+                        viewMode = false
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Back")
+                }
+            }
+
+            return
+        }
+
+        if (showSavedEntries) {
+
+            val savedForRoom = session.savedRoomCharts
+                .filter { it.roomId == selectedRoom?.toString() }
+                .reversed()
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+
+                Text(
+                    "Saved Entries",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = GreenDark
+                )
+
+                Spacer(Modifier.height(12.dp))
+
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+
+                    items(savedForRoom) { snapshot ->
+
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    selectedSnapshot = snapshot
+                                    viewMode = true
+                                    showSavedEntries = false
+                                }
+                        ) {
+                            Column(
+                                Modifier.padding(12.dp)
+                            ) {
+                                Text("Room ${snapshot.roomId}")
+                                Text("Tap to view details")
+                            }
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(12.dp))
+
+                Button(
+                    onClick = {
+                        showSavedEntries = false
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Back")
+                }
+            }
+
+            return
+        }
 
         // STATE 3: ROOM DETAILS
-        // ================= STATE 3: ROOM DETAILS =================
+
         selectedRoom?.let { room ->
 
             val roomKey = room.toString()
@@ -354,9 +477,7 @@ fun WorkerAssignmentScreen(
 
                         session.roomCharts[roomKey] = RoomChart(roomKey)
 
-                        selectedRoom = null
-                        selectedWorker = null
-                        selectedSnapshot = null
+                        selectedSnapshot = snapshot
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary)
@@ -367,10 +488,12 @@ fun WorkerAssignmentScreen(
                 if (viewMode && selectedRoom != null) {
 
                     val roomKey = selectedRoom.toString()
-                    val snapshot = session.savedRoomCharts
-                        .lastOrNull { it.roomId == roomKey }
 
-                    selectedSnapshot?.let { snapshot ->
+                    val snapshotToShow =
+                        selectedSnapshot
+                            ?: session.savedRoomCharts.lastOrNull { it.roomId == roomKey }
+
+                    snapshotToShow?.let { snapshot ->
 
                         val c = snapshot.chart
 
@@ -452,33 +575,17 @@ fun WorkerAssignmentScreen(
                 Spacer(Modifier.height(12.dp))
 
                 // SAVED
-                Text(
-                    text = "Saved Entries",
-                    modifier = Modifier.padding(16.dp),
-                    style = MaterialTheme.typography.titleMedium
-                )
-
-                val savedForRoom = session.savedRoomCharts
-                    .filter { it.roomId == roomKey }
-                    .reversed()
-
-                savedForRoom.forEach { snapshot ->
-
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 6.dp)
-                            .clickable {
-                                selectedSnapshot = snapshot
-                            },
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF1F3F5))
-                    ) {
-                        Column(Modifier.padding(12.dp)) {
-                            Text("Room ${snapshot.roomId}")
-                            Text("Tap to view details")
-                        }
-                    }
+                Button(
+                    onClick = {
+                        showSavedEntries = true
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary)
+                ) {
+                    Text("Saved Entries")
                 }
+
+
             }
         }
     }
