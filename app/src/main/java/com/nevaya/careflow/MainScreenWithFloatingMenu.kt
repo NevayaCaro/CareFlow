@@ -97,10 +97,6 @@ fun MainScreenWithFloatingMenu(
                             navController.navigate("messages")
                             menuExpanded = false
                         }
-                        FloatingMenuItem("Patients", Icons.AutoMirrored.Filled.Assignment) {
-                            navController.navigate("patients")
-                            menuExpanded = false
-                        }
                         FloatingMenuItem("Logout", Icons.AutoMirrored.Filled.ExitToApp) {
                             coroutineScope.launch {
                                 session.clearActiveUser()
