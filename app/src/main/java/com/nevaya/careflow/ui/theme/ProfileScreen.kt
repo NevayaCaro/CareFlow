@@ -9,7 +9,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -141,7 +144,7 @@ fun ProfileScreen(
                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)
                 )
 
-                // ⭐ PATIENTS BUTTON
+                // PATIENTS BUTTON
                 Button(
                     onClick = onViewPatients,
                     modifier = Modifier.fillMaxWidth(),
@@ -162,12 +165,13 @@ fun ProfileScreen(
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = MaterialTheme.colorScheme.secondary
                     ),
-                    border = ButtonDefaults.outlinedButtonBorder.copy(
+                    border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(
                         brush = SolidColor(MaterialTheme.colorScheme.secondary)
                     )
                 ) {
                     Text("Assignments")
                 }
+
             }
         }
     }

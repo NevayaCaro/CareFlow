@@ -24,7 +24,7 @@ fun LoginScreen(
     onForgotPassword: () -> Unit = {},
     onCreateAccount: () -> Unit = {},
     onLoginClick: (String) -> Unit = {},   // username login
-    onQuickLogin: (String) -> Unit = {}    // ⭐ added for tap-to-login
+    onQuickLogin: (String) -> Unit = {}    // added for tap-to-login
 ) {
     var emailOrUsername by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -149,7 +149,7 @@ fun LoginScreen(
                 Text(text = "Create Account")
             }
 
-            // ⭐ TAP-TO-LOGIN SECTION
+            // TAP-TO-LOGIN SECTION
             if (profiles.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(32.dp))
 
@@ -173,7 +173,7 @@ fun LoginScreen(
                                 coroutineScope.launch {
                                     session.setActiveUser(profile.username)
                                 }
-                                onQuickLogin(profile.username)   // ⭐ now works
+                                onQuickLogin(profile.username)   // now works
                             },
                         verticalAlignment = Alignment.CenterVertically
                     ) {
