@@ -18,22 +18,12 @@ import com.nevaya.careflow.data.SessionStore
 import com.nevaya.careflow.data.NurseAssignment
 import com.nevaya.careflow.ui.theme.GreenPrimary
 import com.nevaya.careflow.ui.theme.GreenDark
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.unit.dp
-import androidx.compose.material3.*
-import androidx.compose.ui.text.style.TextAlign
+import com.nevaya.careflow.data.RoomChart
+import com.nevaya.careflow.data.RoomChartSnapshot
+import com.nevaya.careflow.data.LiveActivity
 
 @Composable
 fun WorkerAssignmentScreen(
@@ -50,6 +40,8 @@ fun WorkerAssignmentScreen(
 
     var selectedWorker by remember { mutableStateOf<NurseAssignment?>(null) }
     var selectedRoom by remember { mutableStateOf<Int?>(null) }
+    var viewMode by remember { mutableStateOf(false) }
+    var selectedSnapshot by remember { mutableStateOf<RoomChartSnapshot?>(null) }
 
     val assignments = session.assignments
 
@@ -183,46 +175,26 @@ fun WorkerAssignmentScreen(
             }
         }
 
-        //chip
-        @Composable
-        fun SelectableChip(
-            text: String,
-            selected: Boolean,
-            onClick: () -> Unit
-        ) {
-            Box(
-                modifier = Modifier
-                    .background(
-                        color =
-                            if (selected)
-                                GreenPrimary
-                            else
-                                Color.LightGray.copy(alpha = 0.2f),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                    .clickable { onClick() }
-                    .padding(horizontal = 14.dp, vertical = 10.dp)
-            ) {
-                Text(
-                    text = text,
-                    color =
-                        if (selected)
-                            Color.White
-                        else
-                            Color.Gray
-                )
-            }
-        }
 
         // STATE 3: ROOM DETAILS
+        // ================= STATE 3: ROOM DETAILS =================
         selectedRoom?.let { room ->
 
-            val worker = selectedWorker!!
-            val chart = session.roomCharts.getOrPut(room.toString()) {
-                com.nevaya.careflow.data.RoomChart(room.toString())
+            val roomKey = room.toString()
+            val worker = selectedWorker ?: return@let
+
+            val chart = remember(roomKey) {
+                session.roomCharts.getOrPut(roomKey) {
+                    RoomChart(roomKey)
+                }
             }
 
             val showerAssigned = worker.showers
+                .split(",")
+                .map { it.trim() }
+                .contains(room.toString())
+
+            val mealAssigned = worker.meals
                 .split(",")
                 .map { it.trim() }
                 .contains(room.toString())
@@ -233,375 +205,629 @@ fun WorkerAssignmentScreen(
                     .padding(16.dp)
             ) {
 
-                Text(
-                    text = "ROOM $room",
-                    style = MaterialTheme.typography.headlineSmall
-                )
-
-                Spacer(Modifier.height(10.dp))
-
-                Text(
-                    text = "SHOWER - " + if (showerAssigned) "ASSIGNED" else "NOT ASSIGNED",
-                    color = if (showerAssigned) Color(0xFFFFC107) else Color(0xFF4CAF50)
-                )
+                // HEADER
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = GreenPrimary),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(Modifier.padding(16.dp)) {
+                        Text("ROOM $room", color = Color.White)
+                        Text("${worker.name} • ${worker.role}", color = Color.White.copy(alpha = 0.85f))
+                    }
+                }
 
                 Spacer(Modifier.height(12.dp))
 
+                // SHOWER STATUS
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (showerAssigned)
+                            Color(0xFFFFC107).copy(alpha = 0.2f)
+                        else
+                            Color(0xFF4CAF50).copy(alpha = 0.15f)
+                    )
+                ) {
+                    Text(
+                        text = if (showerAssigned) "SHOWER ASSIGNED" else "NO SHOWER ASSIGNED",
+                        modifier = Modifier.padding(14.dp)
+                    )
+                }
 
+                Spacer(Modifier.height(12.dp))
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor =
+                            if (mealAssigned)
+                                Color(0xFF4CAF50).copy(alpha = 0.15f)
+                            else
+                                Color.Red.copy(alpha = 0.12f)
+                    )
+                ) {
+                    Text(
+                        text =
+                            if (mealAssigned)
+                                "MEAL ASSIGNED"
+                            else
+                                "NO MEAL ASSIGNED",
+                        modifier = Modifier.padding(14.dp)
+                    )
+                }
+
+                Spacer(Modifier.height(12.dp))
+
+                // CONTENT
                 Column(
                     modifier = Modifier
                         .weight(1f)
                         .verticalScroll(rememberScrollState())
                 ) {
 
-// ================= HYGIENE =================
-                    Text("HYGIENE", style = MaterialTheme.typography.titleMedium)
+                    SectionCard("HYGIENE") {
+                        val options = listOf("Shower", "Bed bath", "Peri care", "Teeth brushed", "Gown change")
 
-                    Spacer(Modifier.height(8.dp))
-
-                    val hygieneOptions = listOf(
-                        "Shower",
-                        "Bed bath",
-                        "Peri care",
-                        "Teeth brushed",
-                        "Gown change"
-                    )
-
-                    Column {
-                        hygieneOptions.chunked(2).forEach { row ->
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                row.forEach { item ->
-
-                                    val selected = chart.hygiene.contains(item)
-
-                                    Box(modifier = Modifier.weight(1f)) {
-                                        SelectableChip(
-                                            text = item,
-                                            selected = selected,
-                                            onClick = {
-                                                if (selected) chart.hygiene.remove(item)
-                                                else chart.hygiene.add(item)
-                                            }
-                                        )
-                                    }
-                                }
-
-                                if (row.size == 1) {
-                                    Spacer(modifier = Modifier.weight(1f))
-                                }
+                        ChipGrid(
+                            items = options,
+                            selected = { chart.hygiene.contains(it) },
+                            onToggle = {
+                                if (chart.hygiene.contains(it)) chart.hygiene.remove(it)
+                                else chart.hygiene.add(it)
                             }
-
-                            Spacer(Modifier.height(10.dp))
-                        }
-                    }
-
-                    Spacer(Modifier.height(12.dp))
-
-// ================= LINEN =================
-                    Text("LINEN", style = MaterialTheme.typography.titleMedium)
-
-                    Spacer(Modifier.height(8.dp))
-
-                    val linenOptions = listOf(
-                        "Full bed change",
-                        "Pillow case",
-                        "Bed sheet",
-                        "Underpad",
-                        "Brief"
-                    )
-
-                    Column {
-                        linenOptions.chunked(2).forEach { row ->
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                row.forEach { item ->
-
-                                    val selected = chart.linen.contains(item)
-
-                                    Box(modifier = Modifier.weight(1f)) {
-                                        SelectableChip(
-                                            text = item,
-                                            selected = selected,
-                                            onClick = {
-                                                if (selected) chart.linen.remove(item)
-                                                else chart.linen.add(item)
-                                            }
-                                        )
-                                    }
-                                }
-
-                                if (row.size == 1) {
-                                    Spacer(modifier = Modifier.weight(1f))
-                                }
-                            }
-
-                            Spacer(Modifier.height(10.dp))
-                        }
-                    }
-
-                    Spacer(Modifier.height(12.dp))
-// ================= INCONTINENT DEVICE =================
-                    Text(
-                        text = "INCONTINENT DEVICE",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-
-                    Spacer(Modifier.height(8.dp))
-
-                    val deviceOptions = listOf("Brief", "Pad", "Catheter", "None")
-
-                    Column {
-                        deviceOptions.chunked(2).forEach { row ->
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                row.forEach { item ->
-
-                                    val selected = chart.device == item
-
-                                    Box(modifier = Modifier.weight(1f)) {
-
-                                        SelectableChip(
-                                            text = item,
-                                            selected = selected,
-                                            onClick = {
-                                                chart.device =
-                                                    if (selected) null else item
-                                            }
-                                        )
-                                    }
-                                }
-
-                                if (row.size == 1) {
-                                    Spacer(modifier = Modifier.weight(1f))
-                                }
-                            }
-
-                            Spacer(Modifier.height(10.dp))
-                        }
-                    }
-
-                    Spacer(Modifier.height(12.dp))
-
-// ================= DEVICE COMMENT =================
-                    val focusManager = LocalFocusManager.current
-
-                    var deviceComment by remember(room) {
-                        mutableStateOf(chart.deviceComment)
-                    }
-                    OutlinedTextField(
-                        value = deviceComment,
-                        onValueChange = { deviceComment = it },
-                        label = { Text("Device comment") },
-                        modifier = Modifier.fillMaxWidth(),
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            keyboardType = KeyboardType.Text,
-                            imeAction = ImeAction.Done
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onDone = {
-                                chart.deviceComment = deviceComment
-                                focusManager.clearFocus()
-                            }
-                        ),
-                        singleLine = false
-                    )
-
-                    Spacer(Modifier.height(8.dp))
-
-// ================= REAL VISIBLE DONE BUTTON =================
-                    Button(
-                        onClick = {
-                            chart.deviceComment = deviceComment
-                            focusManager.clearFocus()
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Done")
-                    }
-
-                    Spacer(Modifier.height(12.dp))
-
-
-// ================= MEALS =================
-                    Text("MEALS", style = MaterialTheme.typography.titleMedium)
-
-                    Spacer(Modifier.height(6.dp))
-
-                    val mealsAssigned =
-                        chart.mealIntake.isNotBlank() ||
-                                chart.mealOutputMl.isNotBlank() ||
-                                chart.mealPercentage.isNotBlank()
-
-                    Text(
-                        text = "MEALS - " + if (mealsAssigned) "ASSIGNED" else "NOT ASSIGNED",
-                        color = if (mealsAssigned)
-                            Color(0xFFFFC107)
-                        else
-                            Color(0xFF4CAF50)
-                    )
-
-// ================= INTAKE ML =================
-                    var intakeText by remember(room) {
-                        mutableStateOf(chart.mealIntake)
-                    }
-                    OutlinedTextField(
-                        value = intakeText,
-                        onValueChange = { input ->
-                            val filtered = input.filter { it.isDigit() }
-                            intakeText = filtered
-                            chart.mealIntake = filtered
-                        },
-                        label = { Text("Intake ML (1 - 100000)") },
-                        modifier = Modifier.fillMaxWidth(),
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            keyboardType = KeyboardType.Number
                         )
-                    )
-
-                    Button(
-                        onClick = {
-                            chart.mealIntake =
-                                intakeText.toIntOrNull()
-                                    ?.coerceIn(1, 100000)
-                                    ?.toString()
-                                    ?: ""
-                            focusManager.clearFocus()
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Done")
                     }
 
-                    Spacer(Modifier.height(8.dp))
+                    SectionCard("LINEN") {
+                        val options = listOf("Full bed change", "Pillow case", "Bed sheet", "Underpad", "Brief")
 
-// ================= PERCENTAGE TOGGLE =================
-                    val percentOptions = listOf("0%", "25%", "50%", "75%", "100%")
-
-                    var mealPercentage by remember(room) {
-                        mutableStateOf(chart.mealPercentage)
+                        ChipGrid(
+                            items = options,
+                            selected = { chart.linen.contains(it) },
+                            onToggle = {
+                                if (chart.linen.contains(it)) chart.linen.remove(it)
+                                else chart.linen.add(it)
+                            }
+                        )
                     }
-                    Row {
-                        percentOptions.forEach { percent ->
 
-                            val selected = mealPercentage == percent
+                    SectionCard("DEVICE") {
+                        val options = listOf("Brief", "Pad", "Catheter", "None")
+
+                        ChipGridSingle(
+                            items = options,
+                            selected = chart.device,
+                            onSelect = {
+                                chart.device = if (chart.device == it) null else it
+                            }
+                        )
+
+                        DeviceCommentBox(chart)
+                    }
+
+                    SectionCard("MEALS") {
+                        MealSection(chart)
+                    }
+
+                    SectionCard("TASKS") {
+                        TaskSection(chart)
+                    }
+                }
+
+                // SAVE
+                Button(
+                    onClick = {
+
+                        val currentChart = session.roomCharts[roomKey] ?: return@Button
+
+                        val snapshot = RoomChartSnapshot(
+                            roomId = roomKey,
+                            chart = currentChart.copy(
+                                hygiene = mutableStateListOf(*currentChart.hygiene.toTypedArray()),
+                                linen = mutableStateListOf(*currentChart.linen.toTypedArray()),
+                                tasks = mutableStateListOf(*currentChart.tasks.toTypedArray())
+                            )
+                        )
+
+                        session.savedRoomCharts.add(snapshot)
+
+                        session.liveActivities.add(
+                            LiveActivity(
+                                workerName = worker.name,
+                                roomId = roomKey,
+                                message = buildString {
+                                    append("Updated Room $roomKey: ")
+
+                                    if (currentChart.hygiene.isNotEmpty())
+                                        append("Hygiene ")
+
+                                    if (currentChart.linen.isNotEmpty())
+                                        append("| Linen ")
+
+                                    if (currentChart.tasks.isNotEmpty())
+                                        append("| Tasks updated")
+                                }
+                            )
+                        )
+
+
+                        session.roomCharts[roomKey] = RoomChart(roomKey)
+
+                        selectedRoom = null
+                        selectedWorker = null
+                        selectedSnapshot = null
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary)
+                ) {
+                    Text("Save Entry", color = Color.White)
+                }
+
+                if (viewMode && selectedRoom != null) {
+
+                    val roomKey = selectedRoom.toString()
+                    val snapshot = session.savedRoomCharts
+                        .lastOrNull { it.roomId == roomKey }
+
+                    selectedSnapshot?.let { snapshot ->
+
+                        val c = snapshot.chart
+
+                        fun formatList(title: String, list: List<String>): String {
+                            return if (list.isEmpty()) {
+                                "$title - None"
+                            } else {
+                                "$title - ${list.joinToString(", ")}"
+                            }
+                        }
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp)
+                        ) {
 
                             Text(
-                                text = percent,
-                                modifier = Modifier
-                                    .padding(8.dp)
-                                    .background(
-                                        if (selected)
-                                            GreenPrimary.copy(alpha = 0.2f)
-                                        else Color.Transparent
-                                    )
-                                    .clickable {
-                                        mealPercentage =
-                                            if (mealPercentage == percent) "" else percent
-
-                                        chart.mealPercentage = mealPercentage
-                                    }
-                                    .padding(6.dp),
-                                color = if (selected) GreenPrimary else Color.Gray
+                                "ROOM ${snapshot.roomId} SUMMARY",
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = GreenDark
                             )
-                        }
-                    }
-                    Spacer(Modifier.height(8.dp))
 
-// ================= OUTPUT ML =================
-                    var outputText by remember(room) {
-                        mutableStateOf(chart.mealOutputMl)
-                    }
-                    OutlinedTextField(
-                        value = outputText,
-                        onValueChange = { input ->
-                            val filtered = input.filter { it.isDigit() }
-                            outputText = filtered
-                            chart.mealOutputMl = filtered
-                        },
-                        label = { Text("Output ML") },
-                        modifier = Modifier.fillMaxWidth(),
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            keyboardType = KeyboardType.Number
-                        )
-                    )
+                            Spacer(Modifier.height(12.dp))
 
-                    Button(
-                        onClick = {
-                            chart.mealOutputMl =
-                                outputText.toIntOrNull()
-                                    ?.coerceAtLeast(0)
-                                    ?.toString()
-                                    ?: ""
-                            focusManager.clearFocus()
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Done")
-                    }
+                            // ================= FORMATTED SUMMARY =================
+                            SummaryCard(
+                                "Hygiene",
+                                if (c.hygiene.isEmpty()) "Hygiene - None"
+                                else "Hygiene - ${c.hygiene.joinToString(", ")}"
+                            )
 
-                    Spacer(Modifier.height(8.dp))
+                            Spacer(Modifier.height(10.dp))
 
-                    // ================= TASKS =================
-                    Text("TASKS", style = MaterialTheme.typography.titleMedium)
+                            SummaryCard(
+                                "Linen",
+                                if (c.linen.isEmpty()) "Linen - None"
+                                else "Linen - ${c.linen.joinToString(", ")}"
+                            )
 
-                    var taskInput by remember { mutableStateOf("") }
+                            Spacer(Modifier.height(10.dp))
 
-                    Row {
-                        OutlinedTextField(
-                            value = taskInput,
-                            onValueChange = { taskInput = it },
-                            modifier = Modifier.weight(1f),
-                            label = { Text("Add task") }
-                        )
+                            SummaryCard(
+                                "Device",
+                                "Device - ${c.device ?: "None"}"
+                            )
 
-                        Button(onClick = {
-                            if (taskInput.isNotBlank()) {
-                                chart.tasks.add(taskInput)
-                                taskInput = ""
+                            Spacer(Modifier.height(10.dp))
+
+                            SummaryCard(
+                                "Meals",
+                                """
+        Intake - ${c.mealIntake} ml
+        Output - ${c.mealOutputMl} ml
+        Eaten - ${c.mealPercentage}
+        """.trimIndent()
+                            )
+
+                            Spacer(Modifier.height(10.dp))
+
+                            SummaryCard(
+                                "Tasks",
+                                if (c.tasks.isEmpty()) "Tasks - None"
+                                else c.tasks.joinToString("\n") { "- $it" }
+                            )
+
+                            Spacer(Modifier.height(20.dp))
+
+                            Button(
+                                onClick = { selectedSnapshot = null },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Back")
                             }
-                        }) {
-                            Text("Add")
                         }
-                    }
-
-                    chart.tasks.forEach { task ->
-
-                        Text(
-                            text = "• $task",
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable(
-                                    indication = null,
-                                    interactionSource = remember { MutableInteractionSource() }
-                                ) {
-                                    chart.tasks.remove(task)
-                                }
-                                .padding(8.dp),
-                            color = Color.DarkGray
-                        )
                     }
                 }
 
                 Spacer(Modifier.height(12.dp))
 
-                Button(
-                    onClick = { selectedRoom = null },
-                    colors = ButtonDefaults.buttonColors(containerColor = GreenDark),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Close", color = Color.White)
+                // SAVED
+                Text(
+                    text = "Saved Entries",
+                    modifier = Modifier.padding(16.dp),
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                val savedForRoom = session.savedRoomCharts
+                    .filter { it.roomId == roomKey }
+                    .reversed()
+
+                savedForRoom.forEach { snapshot ->
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 6.dp)
+                            .clickable {
+                                selectedSnapshot = snapshot
+                            },
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF1F3F5))
+                    ) {
+                        Column(Modifier.padding(12.dp)) {
+                            Text("Room ${snapshot.roomId}")
+                            Text("Tap to view details")
+                        }
+                    }
                 }
             }
         }
     }
 }
+
+
+        @Composable
+        fun SelectableChip(
+            text: String,
+            selected: Boolean,
+            onClick: () -> Unit
+        ) {
+            Box(
+                modifier = Modifier
+                    .background(
+                        color = if (selected)
+                            GreenPrimary
+                        else
+                            Color.LightGray.copy(alpha = 0.2f),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    .clickable { onClick() }
+                    .padding(horizontal = 14.dp, vertical = 10.dp)
+            ) {
+                Text(
+                    text = text,
+                    color = if (selected) Color.White else Color.Gray
+                )
+            }
+        }
+
+        @Composable
+        fun SectionCard(title: String, content: @Composable ColumnScope.() -> Unit) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp),
+                shape = RoundedCornerShape(14.dp)
+            ) {
+                Column(modifier = Modifier.padding(14.dp)) {
+
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+
+                    Spacer(Modifier.height(10.dp))
+
+                    content()
+                }
+            }
+        }
+
+        @Composable
+        fun ChipGrid(
+            items: List<String>,
+            selected: (String) -> Boolean,
+            onToggle: (String) -> Unit
+        ) {
+            Column {
+                items.chunked(2).forEach { row ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        row.forEach { item ->
+                            Box(modifier = Modifier.weight(1f)) {
+                                SelectableChip(
+                                    text = item,
+                                    selected = selected(item),
+                                    onClick = { onToggle(item) }
+                                )
+                            }
+                        }
+
+                        if (row.size == 1) Spacer(modifier = Modifier.weight(1f))
+                    }
+
+                    Spacer(Modifier.height(8.dp))
+                }
+            }
+        }
+
+        @Composable
+        fun ChipGridSingle(
+            items: List<String>,
+            selected: String?,
+            onSelect: (String) -> Unit
+        ) {
+            Column {
+                items.chunked(2).forEach { row ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        row.forEach { item ->
+                            Box(modifier = Modifier.weight(1f)) {
+                                SelectableChip(
+                                    text = item,
+                                    selected = selected == item,
+                                    onClick = { onSelect(item) }
+                                )
+                            }
+                        }
+
+                        if (row.size == 1) Spacer(modifier = Modifier.weight(1f))
+                    }
+
+                    Spacer(Modifier.height(8.dp))
+                }
+            }
+        }
+
+        @Composable
+        fun DeviceCommentBox(chart: com.nevaya.careflow.data.RoomChart) {
+
+            val focusManager = LocalFocusManager.current
+
+            var deviceComment by remember(chart) {
+                mutableStateOf(chart.deviceComment)
+            }
+
+            OutlinedTextField(
+                value = deviceComment,
+                onValueChange = { deviceComment = it },
+                label = { Text("Device comment") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(Modifier.height(6.dp))
+
+            Button(
+                onClick = {
+                    chart.deviceComment = deviceComment
+                    focusManager.clearFocus()
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Save")
+            }
+        }
+
+        @Composable
+        fun MealSection(chart: com.nevaya.careflow.data.RoomChart) {
+
+            val focusManager = LocalFocusManager.current
+
+            Column {
+
+                // ================= INTAKE =================
+                var intakeText by remember(chart) {
+                    mutableStateOf(chart.mealIntake)
+                }
+
+                OutlinedTextField(
+                    value = intakeText,
+                    onValueChange = {
+                        val filtered = it.filter { ch -> ch.isDigit() }
+                        intakeText = filtered
+                        chart.mealIntake = filtered
+                    },
+                    label = { Text("Intake (ML)") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(Modifier.height(8.dp))
+
+                Button(
+                    onClick = {
+                        chart.mealIntake =
+                            intakeText.toIntOrNull()
+                                ?.coerceIn(1, 100000)
+                                ?.toString()
+                                ?: ""
+                        focusManager.clearFocus()
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Save Intake")
+                }
+
+                Spacer(Modifier.height(10.dp))
+
+                // ================= PERCENTAGE =================
+                Text("Eaten Percentage", style = MaterialTheme.typography.labelLarge)
+
+                val percentOptions = listOf("0%", "25%", "50%", "75%", "100%")
+
+                var mealPercentage by remember(chart) {
+                    mutableStateOf(chart.mealPercentage)
+                }
+
+                Spacer(Modifier.height(6.dp))
+
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    percentOptions.forEach { percent ->
+
+                        val selected = mealPercentage == percent
+
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    if (selected) GreenPrimary else Color.LightGray.copy(alpha = 0.2f),
+                                    RoundedCornerShape(10.dp)
+                                )
+                                .clickable {
+                                    mealPercentage =
+                                        if (mealPercentage == percent) "" else percent
+
+                                    chart.mealPercentage = mealPercentage
+                                }
+                                .padding(horizontal = 10.dp, vertical = 8.dp)
+                        ) {
+                            Text(
+                                text = percent,
+                                color = if (selected) Color.White else Color.Gray
+                            )
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(10.dp))
+
+                // ================= OUTPUT =================
+                var outputText by remember(chart) {
+                    mutableStateOf(chart.mealOutputMl)
+                }
+
+                OutlinedTextField(
+                    value = outputText,
+                    onValueChange = {
+                        val filtered = it.filter { ch -> ch.isDigit() }
+                        outputText = filtered
+                        chart.mealOutputMl = filtered
+                    },
+                    label = { Text("Output (ML)") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(Modifier.height(8.dp))
+
+                Button(
+                    onClick = {
+                        chart.mealOutputMl =
+                            outputText.toIntOrNull()
+                                ?.coerceAtLeast(0)
+                                ?.toString()
+                                ?: ""
+                        focusManager.clearFocus()
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Save Output")
+                }
+            }
+        }
+
+        @Composable
+        fun TaskSection(chart: com.nevaya.careflow.data.RoomChart) {
+
+            var taskInput by remember { mutableStateOf("") }
+
+            Column {
+
+                // ================= ADD TASK =================
+                Row {
+
+                    OutlinedTextField(
+                        value = taskInput,
+                        onValueChange = { taskInput = it },
+                        modifier = Modifier.weight(1f),
+                        label = { Text("New task") }
+                    )
+
+                    Spacer(Modifier.width(8.dp))
+
+                    Button(
+                        onClick = {
+                            if (taskInput.isNotBlank()) {
+                                chart.tasks.add(taskInput.trim())
+                                taskInput = ""
+                            }
+                        }
+                    ) {
+                        Text("Add")
+                    }
+                }
+
+                Spacer(Modifier.height(10.dp))
+
+                // ================= TASK LIST =================
+                if (chart.tasks.isEmpty()) {
+                    Text(
+                        text = "No tasks assigned",
+                        color = Color.Gray
+                    )
+                    return
+                }
+
+                chart.tasks.forEach { task ->
+
+                    val completed = task.startsWith("[DONE]")
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                            .clickable {
+                                val index = chart.tasks.indexOf(task)
+
+                                if (completed) {
+                                    chart.tasks[index] = task.removePrefix("[DONE] ")
+                                } else {
+                                    chart.tasks[index] = "[DONE] $task"
+                                }
+                            },
+                        colors = CardDefaults.cardColors(
+                            containerColor =
+                                if (completed)
+                                    Color.LightGray.copy(alpha = 0.3f)
+                                else
+                                    Color.White
+                        )
+                    ) {
+                        Text(
+                            text = if (completed)
+                                "✓ ${task.removePrefix("[DONE] ")}"
+                            else
+                                task,
+                            modifier = Modifier.padding(12.dp),
+                            color = if (completed) Color.Gray else Color.Black
+                        )
+                    }
+                }
+            }
+
+        }
+@Composable
+fun SummaryCard(title: String, content: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFF1F3F5)),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(Modifier.padding(12.dp)) {
+            Text(title, color = GreenDark, style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(6.dp))
+            Text(content, color = Color.Black)
+        }
+    }
+}
+

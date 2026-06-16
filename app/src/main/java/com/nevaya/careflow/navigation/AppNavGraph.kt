@@ -148,6 +148,10 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues, startD
             PatientsScreen(navController)
         }
 
+        composable("add_patient") {
+            AddPatientScreen(navController)
+        }
+
         // PATIENT CARD
         composable("patient_card/{roomNumber}") { backStackEntry ->
             val roomNumber =
