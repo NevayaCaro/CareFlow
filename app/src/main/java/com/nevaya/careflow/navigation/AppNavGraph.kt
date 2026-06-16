@@ -15,7 +15,7 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues, startD
 
     NavHost(
         navController = navController,
-        startDestination = "splash"
+        startDestination = "home"
     ) {
 
         // SPLASH
