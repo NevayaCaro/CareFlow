@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.nevaya.careflow.data.repository.RoomRepository
 import com.nevaya.careflow.ui.components.MainScreenWithFloatingMenu
 
 @Composable
@@ -18,21 +19,7 @@ fun PatientsScreen(navController: NavHostController) {
 
     MainScreenWithFloatingMenu(navController) { innerPadding ->
 
-        val fakePatients = listOf(
-            Patient("Johnathan Reed", "High Fall Risk", "Assisted", "Regular Diet", "Needs help with mobility.", 7),
-            Patient("Maria Lopez", "Moderate Fall Risk", "Independent", "Low Sodium", "Prefers warm blankets.", 5),
-            Patient("Sarah Thompson", "Low Fall Risk", "Independent", "Diabetic Diet", "Monitor glucose levels.", 6),
-            Patient("James Carter", "High Fall Risk", "Wheelchair", "Pureed Diet", "Requires full assistance.", 9)
-        )
-
-        val rooms = remember {
-            (100..600 step 5).mapIndexed { index, roomNumber ->
-                Room(
-                    roomNumber = roomNumber,
-                    patient = if (index < fakePatients.size) fakePatients[index] else null
-                )
-            }
-        }
+        val rooms by RoomRepository.rooms.collectAsState()
 
         Column(
             modifier = Modifier
@@ -41,11 +28,23 @@ fun PatientsScreen(navController: NavHostController) {
                 .padding(top = 30.dp, start = 20.dp, end = 20.dp, bottom = 20.dp)
         ) {
 
-            Text(
-                "Patient Rooms",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.secondary
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "Patient Rooms",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+
+                Button(
+                    onClick = { navController.navigate("add_patient") }
+                ) {
+                    Text("+ Assign a Room")
+                }
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 

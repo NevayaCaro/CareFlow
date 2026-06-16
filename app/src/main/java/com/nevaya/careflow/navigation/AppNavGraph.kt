@@ -7,10 +7,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.nevaya.careflow.SplashScreen
 import com.nevaya.careflow.screens.*
+import com.nevaya.careflow.ui.onboarding.OnboardingPagerScreen
 import com.nevaya.careflow.ui.screens.*
 
 @Composable
-fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
+fun AppNavGraph(navController: NavHostController, padding: PaddingValues, startDestination: String) {
 
     NavHost(
         navController = navController,
@@ -21,11 +22,14 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
         composable("splash") {
             SplashScreen(
                 onSplashFinished = {
-                    navController.navigate("login") {
+                    navController.navigate("onboarding") {
                         popUpTo("splash") { inclusive = true }
                     }
                 }
             )
+        }
+        composable("onboarding") {
+            OnboardingPagerScreen(navController)
         }
 
         // LOGIN
@@ -119,17 +123,6 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
             )
         }
 
-        composable("creator_code") {
-            CreatorCodeScreen(
-                onBack = {
-                    navController.popBackStack()
-                },
-                onJoin = { sessionCode ->
-                    navController.navigate("creator/$sessionCode")
-                }
-            )
-        }
-
         // CREATOR ASSIGNMENT (CODE ROUTE)
         composable("creator/{code}") { backStackEntry ->
             val code = backStackEntry.arguments?.getString("code") ?: ""
@@ -153,6 +146,10 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues) {
         // PATIENTS
         composable("patients") {
             PatientsScreen(navController)
+        }
+
+        composable("add_patient") {
+            AddPatientScreen(navController)
         }
 
         // PATIENT CARD

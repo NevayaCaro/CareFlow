@@ -8,23 +8,22 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.nevaya.careflow.viewmodels.PatientCardViewModel
 
 @Composable
 fun PatientCardScreen(
     navController: NavHostController,
-    roomNumber: Int
+    roomNumber: Int,
+    viewModel: PatientCardViewModel = PatientCardViewModel()
 ) {
+    var showDialog by remember { mutableStateOf(false) }
 
-    val fakePatients = listOf(
-        Patient("Johnathan Reed", "High Fall Risk", "Assisted", "Regular Diet", "Needs help with mobility.", 7),
-        Patient("Maria Lopez", "Moderate Fall Risk", "Independent", "Low Sodium", "Prefers warm blankets.", 5),
-        Patient("Sarah Thompson", "Low Fall Risk", "Independent", "Diabetic Diet", "Monitor glucose levels.", 6),
-        Patient("James Carter", "High Fall Risk", "Wheelchair", "Pureed Diet", "Requires full assistance.", 9)
-    )
-
-    val patient = remember {
-        fakePatients.getOrNull((roomNumber / 5) % fakePatients.size)
+    LaunchedEffect(roomNumber) {
+        viewModel.loadRoom(roomNumber)
     }
+
+    val roomState by viewModel.roomState.collectAsState()
+    val patient = roomState?.patient
 
     Column(
         modifier = Modifier
@@ -41,13 +40,19 @@ fun PatientCardScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text("Room Number: $roomNumber", fontSize = MaterialTheme.typography.titleMedium.fontSize)
+        Text("Room Number: $roomNumber")
         Text("Name: ${patient?.name ?: "Empty"}")
         Text("Fall Risk: ${patient?.fallRisk ?: "N/A"}")
         Text("Mobility: ${patient?.mobility ?: "N/A"}")
         Text("Diet: ${patient?.diet ?: "N/A"}")
         Text("Notes: ${patient?.notes ?: "N/A"}")
+        Text("Medication: ${patient?.medication ?: "N/A"}")
         Text("Care Level: ${patient?.careLevel ?: 0}/10")
+        Text("Allergies: ${patient?.allergies ?: "N/A"}")
+        Text("Code Status: ${patient?.codeStatus ?: "N/A"}")
+        Text("Admission Reason: ${patient?.admissionReason ?: "N/A"}")
+        Text("Assigned Nurse: ${patient?.assignedNurse ?: "N/A"}")
+
 
         Spacer(modifier = Modifier.height(40.dp))
 
@@ -66,7 +71,7 @@ fun PatientCardScreen(
             Spacer(modifier = Modifier.width(16.dp))
 
             Button(
-                onClick = { navController.popBackStack() },
+                onClick = { showDialog = true },
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.error,
@@ -76,5 +81,30 @@ fun PatientCardScreen(
                 Text("Empty Room")
             }
         }
+    }
+
+    // Confirmation Dialog
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("Confirm Room Clear") },
+            text = { Text("Are you sure you want to empty this room? This will remove all patient information.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.clearRoom(roomNumber)
+                        showDialog = false
+                        navController.popBackStack()
+                    }
+                ) {
+                    Text("Yes")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text("No")
+                }
+            }
+        )
     }
 }
