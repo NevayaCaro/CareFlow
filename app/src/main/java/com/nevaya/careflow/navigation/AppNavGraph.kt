@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import com.nevaya.careflow.SplashScreen
 import com.nevaya.careflow.screens.*
 import com.nevaya.careflow.ui.screens.*
+import com.nevaya.careflow.ui.splash.OverviewSplashScreen
 
 @Composable
 fun AppNavGraph(navController: NavHostController, padding: PaddingValues, startDestination: String) {
@@ -21,10 +22,17 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues, startD
         composable("splash") {
             SplashScreen(
                 onSplashFinished = {
-                    navController.navigate("onboarding") {
+                    navController.navigate("overview") {
                         popUpTo("splash") { inclusive = true }
                     }
                 }
+            )
+        }
+
+        composable("overview") {
+            OverviewSplashScreen(
+                onContinue = { navController.navigate("login") },
+                onSkip = { navController.navigate("login") }
             )
         }
 
