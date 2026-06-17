@@ -8,14 +8,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.nevaya.careflow.data.ConversationRepository
-import com.nevaya.careflow.ui.components.MainScreenWithFloatingMenu
 
 data class AppUser(
     val id: String,
@@ -24,14 +22,17 @@ data class AppUser(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NewMessageScreen(navController: NavHostController) {
+fun NewMessageScreen(
+    navController: NavHostController,
+    onBack: () -> Unit
+) {
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Start New Message") },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"
@@ -39,12 +40,12 @@ fun NewMessageScreen(navController: NavHostController) {
                     }
                 }
             )
-
         }
     ) { padding ->
 
         var searchQuery by remember { mutableStateOf("") }
 
+        // Temporary static user list (can be replaced with real data later)
         val users = listOf(
             AppUser("u1", "Nurse Admin"),
             AppUser("u2", "Supervisor"),
@@ -88,12 +89,15 @@ fun NewMessageScreen(navController: NavHostController) {
                             .fillMaxWidth()
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
-                                indication = null, // or just remove this param entirely
+                                indication = null,
                                 onClick = {
+                                    // Create or get existing conversation
                                     val convo = ConversationRepository.getOrCreateConversation(
                                         title = user.name,
                                         participants = listOf("Me", user.name)
                                     )
+
+                                    // Navigate to chat screen
                                     navController.navigate("chat/${convo.id}")
                                 }
                             ),
@@ -107,10 +111,9 @@ fun NewMessageScreen(navController: NavHostController) {
                             color = MaterialTheme.colorScheme.onSurface
                         )
                     }
-
                 }
-
             }
         }
     }
 }
+

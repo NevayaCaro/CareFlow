@@ -163,6 +163,16 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues, startD
             MessagesScreen(navController, padding)
         }
 
+        // NEW MESSAGE SCREEN
+        // NEW MESSAGE SCREEN
+        composable("new_message") {
+            NewMessageScreen(
+                navController = navController,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+
         // CHAT
         composable("chat/{id}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("id") ?: ""
