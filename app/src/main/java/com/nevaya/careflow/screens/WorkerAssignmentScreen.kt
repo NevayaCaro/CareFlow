@@ -306,6 +306,7 @@ fun WorkerAssignmentScreen(
             val roomKey = room.toString()
             val worker = selectedWorker ?: return@let
 
+
             val chart = remember(roomKey) {
                 session.roomCharts.getOrPut(roomKey) {
                     RoomChart(roomKey)
@@ -414,19 +415,26 @@ fun WorkerAssignmentScreen(
                             }
                         )
                     }
+                    val deviceState = remember(roomKey) { mutableStateOf(chart.device) }
+                    val deviceCommentState = remember(roomKey) {
+                        mutableStateOf(chart.deviceComment ?: "")
+                    }
 
                     SectionCard("DEVICE") {
                         val options = listOf("Brief", "Pad", "Catheter", "None")
 
                         ChipGridSingle(
                             items = options,
-                            selected = chart.device,
+                            selected = deviceState.value,
                             onSelect = {
-                                chart.device = if (chart.device == it) null else it
+                                deviceState.value =
+                                    if (deviceState.value == it) null else it
+
+                                chart.device = deviceState.value
                             }
                         )
 
-                        DeviceCommentBox(chart)
+                        DeviceCommentBox(chart, roomKey)
                     }
 
                     SectionCard("MEALS") {
@@ -449,7 +457,9 @@ fun WorkerAssignmentScreen(
                             chart = currentChart.copy(
                                 hygiene = mutableStateListOf(*currentChart.hygiene.toTypedArray()),
                                 linen = mutableStateListOf(*currentChart.linen.toTypedArray()),
-                                tasks = mutableStateListOf(*currentChart.tasks.toTypedArray())
+                                tasks = mutableStateListOf(*currentChart.tasks.toTypedArray()),
+                                device = currentChart.device,
+                                deviceComment = currentChart.deviceComment
                             )
                         )
 
@@ -700,17 +710,17 @@ fun ChipGridSingle(
 }
 
 @Composable
-fun DeviceCommentBox(chart: com.nevaya.careflow.data.RoomChart) {
+fun DeviceCommentBox(chart: RoomChart, roomKey: String) {
 
     val focusManager = LocalFocusManager.current
 
-    var deviceComment by remember(chart) {
-        mutableStateOf(chart.deviceComment)
+    val deviceCommentState = remember(roomKey) {
+        mutableStateOf(chart.deviceComment ?: "")
     }
 
     OutlinedTextField(
-        value = deviceComment,
-        onValueChange = { deviceComment = it },
+        value = deviceCommentState.value,
+        onValueChange = { deviceCommentState.value = it },
         label = { Text("Device comment") },
         modifier = Modifier.fillMaxWidth()
     )
@@ -719,7 +729,7 @@ fun DeviceCommentBox(chart: com.nevaya.careflow.data.RoomChart) {
 
     Button(
         onClick = {
-            chart.deviceComment = deviceComment
+            chart.deviceComment = deviceCommentState.value
             focusManager.clearFocus()
         },
         modifier = Modifier.fillMaxWidth()
@@ -727,7 +737,6 @@ fun DeviceCommentBox(chart: com.nevaya.careflow.data.RoomChart) {
         Text("Save")
     }
 }
-
 @Composable
 fun MealSection(chart: com.nevaya.careflow.data.RoomChart) {
 
