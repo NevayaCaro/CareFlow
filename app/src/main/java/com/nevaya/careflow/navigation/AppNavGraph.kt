@@ -154,8 +154,7 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues, startD
             ProfileScreen(
                 navController = navController,
                 onEditProfile = { navController.navigate("edit_profile") },
-                onViewPatients = { navController.navigate("patients") },
-                onViewAssignments = { navController.navigate("assignments") }
+
             )
         }
 

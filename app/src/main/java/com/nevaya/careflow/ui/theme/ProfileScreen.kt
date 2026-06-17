@@ -30,8 +30,7 @@ import androidx.navigation.NavHostController
 fun ProfileScreen(
     navController: NavHostController,
     onEditProfile: () -> Unit = {},
-    onViewAssignments: () -> Unit = {},
-    onViewPatients: () -> Unit
+
 ) {
 
     MainScreenWithFloatingMenu(navController) { innerPadding ->
