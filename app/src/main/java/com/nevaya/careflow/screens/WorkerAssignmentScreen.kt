@@ -54,22 +54,45 @@ fun WorkerAssignmentScreen(
     ) {
 
         // TOP BAR
-        Surface(color = GreenPrimary, modifier = Modifier.fillMaxWidth()) {
-            Box(Modifier.padding(16.dp).fillMaxWidth()) {
+        Surface(
+            color = GreenPrimary,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp)
+        ) {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
 
                 IconButton(
                     onClick = onBack,
                     modifier = Modifier.align(Alignment.CenterStart)
                 ) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color.White)
+                    Icon(
+                        Icons.Default.ArrowBack,
+                        contentDescription = null,
+                        tint = Color.White
+                    )
                 }
 
                 Column(
                     modifier = Modifier.align(Alignment.Center),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text("Shift Board", color = Color.White)
-                    Text("Code: ${session.code}", color = Color.White)
+
+                    Text(
+                        text = "Worker Assignment",
+                        color = Color.White,
+                        style = MaterialTheme.typography.titleLarge
+                    )
+
+                    Text(
+                        text = "Code: ${session.code}",
+                        color = Color.White,
+                        style = MaterialTheme.typography.titleMedium
+                    )
                 }
             }
         }
