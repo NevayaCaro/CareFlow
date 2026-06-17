@@ -288,6 +288,8 @@ fun WorkerAssignmentScreen(
 
                     items(savedForRoom) { snapshot ->
 
+                        val c = snapshot.chart
+
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -297,11 +299,44 @@ fun WorkerAssignmentScreen(
                                     showSavedEntries = false
                                 }
                         ) {
-                            Column(
-                                Modifier.padding(12.dp)
-                            ) {
+                            Column(Modifier.padding(12.dp)) {
+
                                 Text("Room ${snapshot.roomId}")
-                                Text("Tap to view details")
+
+                                Spacer(Modifier.height(6.dp))
+
+                                Text("Hygiene: ${if (c.hygiene.isEmpty()) "None" else c.hygiene.joinToString(", ")}")
+
+                                if (c.hygieneOther.isNotEmpty()) {
+                                    Text("Hygiene Other: ${c.hygieneOther.joinToString(", ")}")
+                                }
+
+                                Spacer(Modifier.height(4.dp))
+
+                                Text("Linen: ${if (c.linen.isEmpty()) "None" else c.linen.joinToString(", ")}")
+
+                                if (c.linenOther.isNotEmpty()) {
+                                    Text("Linen Other: ${c.linenOther.joinToString(", ")}")
+                                }
+
+                                Spacer(Modifier.height(4.dp))
+
+                                Text("Device: ${c.device ?: "None"}")
+
+                                if (c.deviceOther.isNotEmpty()) {
+                                    Text("Device Other: ${c.deviceOther.joinToString(", ")}")
+                                }
+
+                                Spacer(Modifier.height(6.dp))
+
+                                Text("Tasks: ${
+                                    if (c.tasks.isEmpty()) "None"
+                                    else c.tasks.joinToString(", ")
+                                }")
+
+                                Spacer(Modifier.height(6.dp))
+
+                                Text("Tap to view details", color = Color.Gray)
                             }
                         }
                     }
@@ -414,50 +449,115 @@ fun WorkerAssignmentScreen(
                 ) {
 
                     SectionCard("HYGIENE") {
-                        val options = listOf("Shower", "Bed bath", "Peri care", "Teeth brushed", "Gown change")
+
+                        val options = listOf(
+                            "Shower",
+                            "Bed bath",
+                            "Peri care",
+                            "Teeth brushed",
+                            "Gown change",
+                            "Other"
+                        )
 
                         ChipGrid(
                             items = options,
                             selected = { chart.hygiene.contains(it) },
                             onToggle = {
-                                if (chart.hygiene.contains(it)) chart.hygiene.remove(it)
-                                else chart.hygiene.add(it)
+
+                                if (it == "Other") {
+                                    chart.hygiene.add("Other")
+                                }
+                                else if (chart.hygiene.contains(it)) {
+                                    chart.hygiene.remove(it)
+                                }
+                                else {
+                                    chart.hygiene.add(it)
+                                }
                             }
                         )
+
+
+                        if (chart.hygiene.contains("Other")) {
+                            OtherCommentBox(
+                                title = "Hygiene Other",
+                                items = chart.hygieneOther
+                            )
+                        }
                     }
 
                     SectionCard("LINEN") {
-                        val options = listOf("Full bed change", "Pillow case", "Bed sheet", "Underpad", "Brief")
+
+                        val options = listOf(
+                            "Full bed change",
+                            "Pillow case",
+                            "Bed sheet",
+                            "Underpad",
+                            "Brief",
+                            "Other"
+                        )
 
                         ChipGrid(
                             items = options,
                             selected = { chart.linen.contains(it) },
                             onToggle = {
-                                if (chart.linen.contains(it)) chart.linen.remove(it)
-                                else chart.linen.add(it)
+
+                                if (chart.linen.contains(it)) {
+                                    chart.linen.remove(it)
+                                }
+                                else {
+                                    chart.linen.add(it)
+                                }
                             }
                         )
-                    }
-                    val deviceState = remember(roomKey) { mutableStateOf(chart.device) }
-                    val deviceCommentState = remember(roomKey) {
-                        mutableStateOf(chart.deviceComment ?: "")
+
+
+                        if (chart.linen.contains("Other")) {
+
+                            OtherCommentBox(
+                                title = "Linen Other",
+                                items = chart.linenOther
+                            )
+                        }
                     }
 
                     SectionCard("DEVICE") {
-                        val options = listOf("Brief", "Pad", "Catheter", "None")
+
+                        var deviceState by remember(roomKey) {
+                            mutableStateOf(chart.device)
+                        }
+
+                        val options = listOf(
+                            "Brief",
+                            "Pad",
+                            "Catheter",
+                            "None",
+                            "Other"
+                        )
+
 
                         ChipGridSingle(
                             items = options,
-                            selected = deviceState.value,
+                            selected = deviceState,
                             onSelect = {
-                                deviceState.value =
-                                    if (deviceState.value == it) null else it
 
-                                chart.device = deviceState.value
+                                deviceState =
+                                    if (deviceState == it)
+                                        null
+                                    else
+                                        it
+
+                                chart.device = deviceState
                             }
                         )
 
-                        DeviceCommentBox(chart, roomKey)
+
+                        if (deviceState == "Other") {
+
+                            OtherCommentBox(
+                                title = "Device Other",
+                                items = chart.deviceOther
+                            )
+                        }
                     }
 
                     SectionCard("MEALS") {
@@ -481,8 +581,12 @@ fun WorkerAssignmentScreen(
                                 hygiene = mutableStateListOf(*currentChart.hygiene.toTypedArray()),
                                 linen = mutableStateListOf(*currentChart.linen.toTypedArray()),
                                 tasks = mutableStateListOf(*currentChart.tasks.toTypedArray()),
+
                                 device = currentChart.device,
-                                deviceComment = currentChart.deviceComment
+
+                                hygieneOther = currentChart.hygieneOther,
+                                linenOther = currentChart.linenOther,
+                                deviceOther = currentChart.deviceOther
                             )
                         )
 
@@ -555,34 +659,64 @@ fun WorkerAssignmentScreen(
                             // ================= FORMATTED SUMMARY =================
                             SummaryCard(
                                 "Hygiene",
-                                if (c.hygiene.isEmpty()) "Hygiene - None"
-                                else "Hygiene - ${c.hygiene.joinToString(", ")}"
+                                buildString {
+                                    append(
+                                        if (c.hygiene.isEmpty())
+                                            "Hygiene - None"
+                                        else
+                                            "Hygiene - ${c.hygiene.joinToString(", ")}"
+                                    )
+
+                                    if (c.hygieneOther.isNotEmpty()) {
+                                        append("\nOther: ${c.hygieneOther}")
+                                    }
+                                }
                             )
 
                             Spacer(Modifier.height(10.dp))
 
                             SummaryCard(
                                 "Linen",
-                                if (c.linen.isEmpty()) "Linen - None"
-                                else "Linen - ${c.linen.joinToString(", ")}"
+                                buildString {
+
+                                    append(
+                                        if (c.linen.isEmpty())
+                                            "Linen - None"
+                                        else
+                                            "Linen - ${c.linen.joinToString(", ")}"
+                                    )
+
+                                    if (c.linenOther.isNotEmpty()) {
+                                        append("\nOther: ${c.linenOther}")
+                                    }
+                                }
                             )
 
                             Spacer(Modifier.height(10.dp))
 
                             SummaryCard(
                                 "Device",
-                                "Device - ${c.device ?: "None"}"
+                                buildString {
+
+                                    append(
+                                        "Device - ${c.device ?: "None"}"
+                                    )
+
+                                    if (c.deviceOther.isNotEmpty()) {
+                                        append("\nOther: ${c.deviceOther}")
+                                    }
+                                }
                             )
 
                             Spacer(Modifier.height(10.dp))
 
                             SummaryCard(
                                 "Meals",
-                                """
-        Intake - ${c.mealIntake} ml
-        Output - ${c.mealOutputMl} ml
-        Eaten - ${c.mealPercentage}
-        """.trimIndent()
+                                buildString {
+                                    appendLine("Intake - ${c.mealIntake} ml")
+                                    appendLine("Output - ${c.mealOutputMl} ml")
+                                    append("Eaten - ${c.mealPercentage}")
+                                }
                             )
 
                             Spacer(Modifier.height(10.dp))
@@ -733,31 +867,62 @@ fun ChipGridSingle(
 }
 
 @Composable
-fun DeviceCommentBox(chart: RoomChart, roomKey: String) {
+fun OtherCommentBox(
+    title: String,
+    items: MutableList<String>
+) {
 
-    val focusManager = LocalFocusManager.current
+    var input by remember { mutableStateOf("") }
 
-    val deviceCommentState = remember(roomKey) {
-        mutableStateOf(chart.deviceComment ?: "")
-    }
+    Column {
 
-    OutlinedTextField(
-        value = deviceCommentState.value,
-        onValueChange = { deviceCommentState.value = it },
-        label = { Text("Device comment") },
-        modifier = Modifier.fillMaxWidth()
-    )
+        Row {
 
-    Spacer(Modifier.height(6.dp))
+            OutlinedTextField(
+                value = input,
+                onValueChange = {
+                    input = it
+                },
+                label = {
+                    Text(title)
+                },
+                modifier = Modifier.weight(1f)
+            )
 
-    Button(
-        onClick = {
-            chart.deviceComment = deviceCommentState.value
-            focusManager.clearFocus()
-        },
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text("Save")
+            Spacer(Modifier.width(8.dp))
+
+            Button(
+                onClick = {
+
+                    if (input.isNotBlank()) {
+                        items.add(input.trim())
+                        input = ""
+                    }
+
+                }
+            ) {
+                Text("Add")
+            }
+        }
+
+
+        Spacer(Modifier.height(10.dp))
+
+
+        items.forEach { comment ->
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+            ) {
+
+                Text(
+                    text = comment,
+                    modifier = Modifier.padding(12.dp)
+                )
+            }
+        }
     }
 }
 @Composable
