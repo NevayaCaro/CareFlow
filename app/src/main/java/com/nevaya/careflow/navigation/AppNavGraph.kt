@@ -106,7 +106,18 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues, startD
             )
         }
 
-        // WORKER ENTRY (JOIN SCREEN FIRST)
+        composable("creator_code") {
+            CreatorCodeScreen(
+                onJoin = { code ->
+                    navController.navigate("creator/$code") {
+                        popUpTo("creator_code") { inclusive = true }
+                    }
+                },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        // WORKER CODE ENTRY
         composable("workerCodeEntry") {
             JoinWorkerScreen(
                 onJoinValid = { code ->
@@ -118,7 +129,7 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues, startD
             )
         }
 
-// WORKER ASSIGNMENT SCREEN
+        // WORKER ASSIGNMENT
         composable("worker/{code}") { backStackEntry ->
             val code = backStackEntry.arguments?.getString("code") ?: ""
 
@@ -128,7 +139,7 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues, startD
             )
         }
 
-        // CREATOR ASSIGNMENT (CODE ROUTE)
+        // CREATOR ASSIGNMENT
         composable("creator/{code}") { backStackEntry ->
             val code = backStackEntry.arguments?.getString("code") ?: ""
 
