@@ -144,33 +144,7 @@ fun ProfileScreen(
                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)
                 )
 
-                // PATIENTS BUTTON
-                Button(
-                    onClick = onViewPatients,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondary,
-                        contentColor = MaterialTheme.colorScheme.onSecondary
-                    )
-                ) {
-                    Text("Patients")
-                }
 
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // ASSIGNMENTS BUTTON
-                OutlinedButton(
-                    onClick = onViewAssignments,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.secondary
-                    ),
-                    border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(
-                        brush = SolidColor(MaterialTheme.colorScheme.secondary)
-                    )
-                ) {
-                    Text("Assignments")
-                }
 
             }
         }
