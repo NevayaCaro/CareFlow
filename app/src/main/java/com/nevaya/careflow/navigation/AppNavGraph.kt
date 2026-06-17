@@ -7,36 +7,30 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.nevaya.careflow.SplashScreen
 import com.nevaya.careflow.screens.*
+import com.nevaya.careflow.ui.onboarding.OnboardingPagerScreen
 import com.nevaya.careflow.ui.screens.*
-import com.nevaya.careflow.ui.splash.OverviewSplashScreen
 
 @Composable
 fun AppNavGraph(navController: NavHostController, padding: PaddingValues, startDestination: String) {
 
     NavHost(
         navController = navController,
-        startDestination = "splash"
+        startDestination = "home"
     ) {
 
         // SPLASH
         composable("splash") {
             SplashScreen(
                 onSplashFinished = {
-                    navController.navigate("overview") {
+                    navController.navigate("onboarding") {
                         popUpTo("splash") { inclusive = true }
                     }
                 }
             )
         }
-
-        composable("overview") {
-            OverviewSplashScreen(
-                onContinue = { navController.navigate("login") },
-                onSkip = { navController.navigate("login") }
-            )
+        composable("onboarding") {
+            OnboardingPagerScreen(navController)
         }
-
-
 
         // LOGIN
         composable("login") {
@@ -149,7 +143,22 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues, startD
             )
         }
 
+        // PATIENTS
+        composable("patients") {
+            PatientsScreen(navController)
+        }
 
+        composable("add_patient") {
+            AddPatientScreen(navController)
+        }
+
+        // PATIENT CARD
+        composable("patient_card/{roomNumber}") { backStackEntry ->
+            val roomNumber =
+                backStackEntry.arguments?.getString("roomNumber")?.toInt() ?: 0
+
+            PatientCardScreen(navController, roomNumber)
+        }
 
         // ASSIGNMENTS
         composable("assignments") {
