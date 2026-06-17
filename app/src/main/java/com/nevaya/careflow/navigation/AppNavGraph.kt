@@ -8,10 +8,45 @@ import androidx.navigation.compose.composable
 import com.nevaya.careflow.SplashScreen
 import com.nevaya.careflow.screens.*
 import com.nevaya.careflow.ui.onboarding.OnboardingPagerScreen
+import com.nevaya.careflow.SplashScreen
+import com.nevaya.careflow.screens.JoinWorkerScreen
+import com.nevaya.careflow.screens.WorkerAssignmentScreen
+import com.nevaya.careflow.screens.CreatorAssignmentScreen
+import com.nevaya.careflow.screens.CreatorCodeScreen
+import com.nevaya.careflow.ui.onboarding.OnboardingPagerScreen
+
+// UI screens (adjust if your package differs)
+import com.nevaya.careflow.ui.screens.LoginScreen
+import com.nevaya.careflow.ui.screens.ForgotPasswordScreen
+import com.nevaya.careflow.ui.screens.AuthorizationScreen
+import com.nevaya.careflow.ui.screens.CreateAccountScreen
+import com.nevaya.careflow.ui.screens.HomeScreen
+import com.nevaya.careflow.ui.screens.ProfileScreen
+import com.nevaya.careflow.ui.screens.RoomAssignmentsScreen
+import com.nevaya.careflow.ui.screens.MessagesScreen
+import com.nevaya.careflow.ui.screens.ChatScreen
+import com.nevaya.careflow.ui.screens.SettingsScreen
+import com.nevaya.careflow.ui.screens.EditProfileScreen
+import com.nevaya.careflow.ui.screens.ChangePasswordScreen
+import com.nevaya.careflow.ui.screens.TwoFactorAuthScreen
+import com.nevaya.careflow.ui.screens.DownloadMyDataScreen
+import com.nevaya.careflow.ui.screens.ClearCacheScreen
+import com.nevaya.careflow.ui.screens.DeleteAccountScreen
+import com.nevaya.careflow.ui.screens.ContactSupportScreen
+import com.nevaya.careflow.ui.screens.ReportIssueScreen
+import com.nevaya.careflow.screens.JoinWorkerScreen
+import com.nevaya.careflow.screens.WorkerAssignmentScreen
+import com.nevaya.careflow.screens.CreatorAssignmentScreen
+import com.nevaya.careflow.screens.CreatorCodeScreen
+
 import com.nevaya.careflow.ui.screens.*
 
 @Composable
-fun AppNavGraph(navController: NavHostController, padding: PaddingValues, startDestination: String) {
+fun AppNavGraph(
+    navController: NavHostController,
+    padding: PaddingValues,
+    startDestination: String
+) {
 
     NavHost(
         navController = navController,
@@ -28,6 +63,8 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues, startD
                 }
             )
         }
+
+        // ONBOARDING
         composable("onboarding") {
             OnboardingPagerScreen(navController)
         }
@@ -37,14 +74,11 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues, startD
             LoginScreen(
                 onForgotPassword = { navController.navigate("forgot_password") },
                 onCreateAccount = { navController.navigate("create_account") },
-
-
                 onLoginClick = {
                     navController.navigate("home") {
                         popUpTo("login") { inclusive = true }
                     }
                 },
-
                 onQuickLogin = {
                     navController.navigate("home") {
                         popUpTo("login") { inclusive = true }
@@ -61,7 +95,7 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues, startD
             )
         }
 
-        // AUTHORIZATION
+        // AUTH
         composable("authorization") {
             AuthorizationScreen(
                 onBack = { navController.popBackStack() },
@@ -81,7 +115,7 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues, startD
             )
         }
 
-        // HOME (MAIN HUB)
+        // HOME
         composable("home") {
             HomeScreen(
                 padding = padding,
@@ -89,7 +123,7 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues, startD
             )
         }
 
-        // CREATE GROUP
+        // CREATE SESSION
         composable("create") {
             CreateScreen(
                 onDoneClick = { code ->
@@ -101,7 +135,19 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues, startD
             )
         }
 
-        // WORKER ENTRY (JOIN SCREEN FIRST)
+
+        composable("creator_code") {
+            CreatorCodeScreen(
+                onJoin = { code ->
+                    navController.navigate("creator/$code") {
+                        popUpTo("creator_code") { inclusive = true }
+                    }
+                },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        // WORKER CODE ENTRY
         composable("workerCodeEntry") {
             JoinWorkerScreen(
                 onJoinValid = { code ->
@@ -113,7 +159,7 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues, startD
             )
         }
 
-// WORKER ASSIGNMENT SCREEN
+        // WORKER ASSIGNMENT
         composable("worker/{code}") { backStackEntry ->
             val code = backStackEntry.arguments?.getString("code") ?: ""
 
@@ -123,7 +169,7 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues, startD
             )
         }
 
-        // CREATOR ASSIGNMENT (CODE ROUTE)
+        // CREATOR ASSIGNMENT
         composable("creator/{code}") { backStackEntry ->
             val code = backStackEntry.arguments?.getString("code") ?: ""
 
@@ -141,23 +187,6 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues, startD
                 onViewPatients = { navController.navigate("patients") },
                 onViewAssignments = { navController.navigate("assignments") }
             )
-        }
-
-        // PATIENTS
-        composable("patients") {
-            PatientsScreen(navController)
-        }
-
-        composable("add_patient") {
-            AddPatientScreen(navController)
-        }
-
-        // PATIENT CARD
-        composable("patient_card/{roomNumber}") { backStackEntry ->
-            val roomNumber =
-                backStackEntry.arguments?.getString("roomNumber")?.toInt() ?: 0
-
-            PatientCardScreen(navController, roomNumber)
         }
 
         // ASSIGNMENTS
@@ -184,17 +213,14 @@ fun AppNavGraph(navController: NavHostController, padding: PaddingValues, startD
             SettingsScreen(navController, padding)
         }
 
-        // SETTINGS SUB-SCREENS
         composable("edit_profile") { EditProfileScreen(navController) }
         composable("change_password") { ChangePasswordScreen(navController) }
         composable("two_factor") { TwoFactorAuthScreen(navController) }
 
-        // DATA & PRIVACY
         composable("download_data") { DownloadMyDataScreen(navController) }
         composable("clear_cache") { ClearCacheScreen(navController) }
         composable("delete_account") { DeleteAccountScreen(navController) }
 
-        // SUPPORT
         composable("contact_support") { ContactSupportScreen(navController) }
         composable("report_issue") { ReportIssueScreen(navController) }
     }

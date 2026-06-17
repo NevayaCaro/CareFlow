@@ -16,9 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.RoundedCornerShape
-import com.nevaya.careflow.data.SessionStore
-import com.nevaya.careflow.data.NurseAssignment
-import com.nevaya.careflow.data.RoomChart
+import com.nevaya.careflow.data.*
 import com.nevaya.careflow.ui.theme.GreenPrimary
 import com.nevaya.careflow.ui.theme.GreenDark
 
@@ -29,14 +27,11 @@ fun CreatorAssignmentScreen(
 ) {
     val session = SessionStore.getSessionByCreatorCode(sessionCode)
         ?: SessionStore.getSession(sessionCode)
-        ?: run {
-            Text("Invalid session code")
-            return
-        }
+        ?: return
 
-    var selectedWorker by remember { mutableStateOf<NurseAssignment?>(null) }
+    var screenMode by remember { mutableStateOf("MAIN") }
+
     var showAddMember by remember { mutableStateOf(false) }
-
     var editIndex by remember { mutableStateOf<Int?>(null) }
 
     var name by remember { mutableStateOf("") }
@@ -45,8 +40,23 @@ fun CreatorAssignmentScreen(
     var showersText by remember { mutableStateOf("") }
     var mealsText by remember { mutableStateOf("") }
 
-    val assignments = session.assignments.toMutableStateList()
+    val assignments = remember { session.assignments.toMutableStateList() }
     val roomList = session.rooms
+
+    var showPatientForm by remember { mutableStateOf(false) }
+    var selectedPatientRoom by remember { mutableStateOf(roomList.firstOrNull() ?: 0) }
+    var patientEditIndex by remember { mutableStateOf<Int?>(null) }
+
+    var patientName by remember { mutableStateOf("") }
+    var patientAge by remember { mutableStateOf("") }
+    var patientGender by remember { mutableStateOf("") }
+    var patientDiagnosis by remember { mutableStateOf("") }
+    var patientAllergies by remember { mutableStateOf("") }
+    var patientDiet by remember { mutableStateOf("") }
+    var patientMobility by remember { mutableStateOf("") }
+    var patientPrecautions by remember { mutableStateOf("") }
+    var patientCodeStatus by remember { mutableStateOf("") }
+    var patientNotes by remember { mutableStateOf("") }
 
     fun resetForm() {
         name = ""
@@ -57,290 +67,415 @@ fun CreatorAssignmentScreen(
         editIndex = null
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFF4F6F8))
-    ) {
+    fun resetPatientForm() {
+        patientName = ""
+        patientAge = ""
+        patientGender = ""
+        patientDiagnosis = ""
+        patientAllergies = ""
+        patientDiet = ""
+        patientMobility = ""
+        patientPrecautions = ""
+        patientCodeStatus = ""
+        patientNotes = ""
+        patientEditIndex = null
+    }
 
-        // ================= TOP BAR =================
-        Surface(color = GreenPrimary) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                IconButton(onClick = onBack) {
-                    Icon(Icons.Default.ArrowBack, null, tint = Color.White)
-                }
+    if (screenMode == "MAIN") {
 
-                Text(
-                    "Creator Dashboard",
-                    modifier = Modifier.align(Alignment.Center),
-                    color = Color.White
-                )
-            }
-        }
-
-        Spacer(Modifier.height(10.dp))
-        // ================= LIVE ACTIVITY FEED =================
-        Text(
-            text = "Live Activity",
-            modifier = Modifier.padding(start = 16.dp, top = 8.dp),
-            style = MaterialTheme.typography.titleMedium,
-            color = GreenDark
-        )
-
-        Card(
+        Column(
             modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+                .fillMaxSize()
+                .background(Color(0xFFF4F6F8))
         ) {
 
-            val activities = session.liveActivities.reversed()
-
-            if (activities.isEmpty()) {
+            // ================= TOP BAR =================
+            Surface(color = GreenPrimary) {
                 Box(
-                    modifier = Modifier
+                    Modifier
+                        .fillMaxWidth()
                         .padding(16.dp)
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
                 ) {
-                    Text("No activity yet", color = Color.Gray)
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, null, tint = Color.White)
+                    }
+                    Text(
+                        "Creator Dashboard",
+                        modifier = Modifier.align(Alignment.Center),
+                        color = Color.White
+                    )
                 }
-            } else {
+            }
+
+            Spacer(Modifier.height(10.dp))
+
+            // ================= LIVE ACTIVITY =================
+            Text(
+                "Live Activity",
+                modifier = Modifier.padding(16.dp),
+                color = GreenDark
+            )
+
+            Card(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+
+                val activities = session.liveActivities.reversed()
 
                 Column(
-                    modifier = Modifier
+                    Modifier
                         .padding(12.dp)
                         .heightIn(max = 180.dp)
                         .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
 
-                    activities.forEach { activity ->
-
-                        Card(
-                            shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = Color(0xFFF1F3F5)
-                            )
-                        ) {
-                            Column(Modifier.padding(10.dp)) {
-
-                                Text(
-                                    text = activity.workerName,
-                                    color = GreenPrimary
-                                )
-
-                                Text(
-                                    text = "Room ${activity.roomId}",
-                                    color = Color.Gray
-                                )
-
-                                Text(
-                                    text = activity.message,
-                                    color = Color.Black
-                                )
+                    if (activities.isEmpty()) {
+                        Text("No activity yet")
+                    } else {
+                        activities.forEach {
+                            Column {
+                                Text(it.workerName, color = GreenPrimary)
+                                Text("Room ${it.roomId}")
+                                Text(it.message)
                             }
                         }
                     }
                 }
             }
-        }
 
-        // ================= ADD MEMBER BUTTON =================
-        Button(
-            onClick = {
-                showAddMember = !showAddMember
-                resetForm()
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary)
-        ) {
-            Text("+ Add New Member", color = Color.White)
-        }
-
-        // ================= ADD / EDIT FORM =================
-        if (showAddMember) {
-
-            Card(
+            // ================= PATIENT BUTTON (NOW BETWEEN SECTIONS) =================
+            Button(
+                onClick = { screenMode = "PATIENT" },
                 modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp)
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                colors = ButtonDefaults.buttonColors(GreenPrimary)
             ) {
-
-                Column(Modifier.padding(16.dp)) {
-
-                    OutlinedTextField(
-                        value = name,
-                        onValueChange = { name = it },
-                        label = { Text("Name") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Spacer(Modifier.height(10.dp))
-
-                    Row {
-                        listOf("CNA", "LPN", "RN").forEach {
-                            Button(
-                                onClick = { role = it },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = if (role == it) GreenPrimary else Color.LightGray
-                                ),
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Text(it)
-                            }
-                        }
-                    }
-
-                    Spacer(Modifier.height(10.dp))
-
-                    // ROOMS
-                    Text("Rooms")
-
-                    roomList.chunked(4).forEach { row ->
-                        Row {
-                            row.forEach { room ->
-
-                                val selected = selectedRooms.contains(room)
-
-                                Box(
-                                    modifier = Modifier
-                                        .padding(4.dp)
-                                        .background(
-                                            if (selected) GreenPrimary else Color.LightGray,
-                                            RoundedCornerShape(10.dp)
-                                        )
-                                        .clickable {
-                                            selectedRooms =
-                                                if (selected) selectedRooms - room
-                                                else selectedRooms + room
-                                        }
-                                        .padding(10.dp)
-                                ) {
-                                    Text(room.toString())
-                                }
-                            }
-                        }
-                    }
-
-                    Spacer(Modifier.height(10.dp))
-
-                    OutlinedTextField(
-                        value = showersText,
-                        onValueChange = { showersText = it },
-                        label = { Text("Showers (comma)") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    OutlinedTextField(
-                        value = mealsText,
-                        onValueChange = { mealsText = it },
-                        label = { Text("Meals (comma)") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Spacer(Modifier.height(10.dp))
-
-                    Button(
-                        onClick = {
-
-                            val new = NurseAssignment(
-                                name = name,
-                                role = role,
-                                rooms = selectedRooms.sorted().joinToString(", "),
-                                showers = showersText,
-                                meals = mealsText
-                            )
-
-                            if (editIndex != null) {
-                                assignments[editIndex!!] = new
-                            } else {
-                                assignments.add(new)
-                            }
-
-                            session.assignments = assignments
-                            resetForm()
-                            showAddMember = false
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = GreenDark)
-                    ) {
-                        Text(if (editIndex == null) "Add Worker" else "Save Changes", color = Color.White)
-                    }
-                }
+                Text("Patient Rooms")
             }
-        }
 
-        // ================= WORKER LIST (LIKE WORKER SCREEN) =================
-        LazyColumn(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
+            // ================= ADD MEMBER =================
+            Button(
+                onClick = {
+                    showAddMember = !showAddMember
+                    resetForm()
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                colors = ButtonDefaults.buttonColors(GreenPrimary)
+            ) {
+                Text("+ Add New Member")
+            }
 
-            items(assignments) { worker ->
+            // ================= ADD MEMBER FORM =================
+            if (showAddMember) {
 
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = GreenPrimary),
-                    shape = RoundedCornerShape(16.dp)
+                    Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth()
                 ) {
 
                     Column(Modifier.padding(16.dp)) {
 
-                        Text(worker.name, color = Color.White)
-                        Text(worker.role, color = Color.White)
+                        OutlinedTextField(name, { name = it }, label = { Text("Name") })
 
-                        Spacer(Modifier.height(8.dp))
+                        Row {
+                            listOf("CNA", "LPN", "RN").forEach {
+                                Button(
+                                    onClick = { role = it },
+                                    modifier = Modifier.weight(1f),
+                                    colors = ButtonDefaults.buttonColors(
+                                        if (role == it) GreenPrimary else Color.LightGray
+                                    )
+                                ) { Text(it) }
+                            }
+                        }
 
-                        Text("Rooms: ${worker.rooms}", color = Color.White.copy(0.9f))
-                        Text("Showers: ${worker.showers}", color = Color.White.copy(0.9f))
-                        Text("Meals: ${worker.meals}", color = Color.White.copy(0.9f))
+                        Text("Rooms")
+
+                        roomList.chunked(3).forEach { row ->
+                            Row(
+                                Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                row.forEach { room ->
+                                    val selected = selectedRooms.contains(room)
+
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .background(
+                                                if (selected) GreenPrimary else Color.LightGray,
+                                                RoundedCornerShape(8.dp)
+                                            )
+                                            .clickable {
+                                                selectedRooms =
+                                                    if (selected) selectedRooms - room
+                                                    else selectedRooms + room
+                                            }
+                                            .padding(10.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(room.toString())
+                                    }
+                                }
+                            }
+                        }
 
                         Spacer(Modifier.height(10.dp))
 
-                        Row {
+                        OutlinedTextField(showersText, { showersText = it }, label = { Text("Showers") })
+                        OutlinedTextField(mealsText, { mealsText = it }, label = { Text("Meals") })
 
-                            Button(
-                                onClick = {
-                                    name = worker.name
-                                    role = worker.role
-                                    selectedRooms = worker.rooms
-                                        .split(",")
-                                        .mapNotNull { it.trim().toIntOrNull() }
-                                        .toSet()
+                        Button(
+                            onClick = {
+                                val new = NurseAssignment(
+                                    name,
+                                    role,
+                                    selectedRooms.joinToString(", "),
+                                    showersText,
+                                    mealsText
+                                )
 
-                                    showersText = worker.showers
-                                    mealsText = worker.meals
+                                if (editIndex != null) assignments[editIndex!!] = new
+                                else assignments.add(new)
 
-                                    editIndex = assignments.indexOf(worker)
-                                    showAddMember = true
-                                },
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Text("Edit")
-                            }
+                                session.assignments = assignments
+                                resetForm()
+                                showAddMember = false
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(GreenDark)
+                        ) {
+                            Text("Save")
+                        }
+                    }
+                }
+            }
 
-                            Spacer(Modifier.width(8.dp))
+            // ================= WORKER LIST =================
+            LazyColumn(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
 
-                            Button(
-                                onClick = {
-                                    assignments.remove(worker)
-                                    session.assignments = assignments
-                                },
-                                modifier = Modifier.weight(1f),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-                            ) {
-                                Text("Delete")
+                items(assignments) { worker ->
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = GreenPrimary)
+                    ) {
+
+                        Column(Modifier.padding(16.dp)) {
+
+                            Text(worker.name, color = Color.White)
+                            Text(worker.role, color = Color.White)
+
+                            Text("Rooms: ${worker.rooms}", color = Color.White)
+                            Text("Showers: ${worker.showers}", color = Color.White)
+                            Text("Meals: ${worker.meals}", color = Color.White)
+
+                            Row {
+                                Button(
+                                    onClick = {
+                                        name = worker.name
+                                        role = worker.role
+                                        selectedRooms = worker.rooms
+                                            .split(",")
+                                            .mapNotNull { it.trim().toIntOrNull() }
+                                            .toSet()
+
+                                        showersText = worker.showers
+                                        mealsText = worker.meals
+                                        editIndex = assignments.indexOf(worker)
+                                        showAddMember = true
+                                    },
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text("Edit")
+                                }
+
+                                Button(
+                                    onClick = {
+                                        assignments.remove(worker)
+                                        session.assignments = assignments
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    colors = ButtonDefaults.buttonColors(Color.Red)
+                                ) {
+                                    Text("Delete")
+                                }
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    // ================= PATIENT MODE =================
+    if (screenMode == "PATIENT") {
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFFF4F6F8))
+        ) {
+
+            Button(
+                onClick = {
+                    screenMode = "MAIN"
+                    showPatientForm = false
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("← Back")
+            }
+
+            if (!showPatientForm) {
+
+                roomList.chunked(3).forEach { row ->
+
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+
+                        row.forEach { room ->
+
+                            val patient = session.patients.find { it.roomNumber == room }
+
+                            Card(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clickable {
+
+                                        selectedPatientRoom = room
+
+                                        if (patient != null) {
+                                            patientName = patient.patientName
+                                            patientAge = patient.age
+                                            patientGender = patient.gender
+                                            patientDiagnosis = patient.diagnosis
+                                            patientAllergies = patient.allergies
+                                            patientDiet = patient.diet
+                                            patientMobility = patient.mobility
+                                            patientPrecautions = patient.precautions
+                                            patientCodeStatus = patient.codeStatus
+                                            patientNotes = patient.notes
+                                            patientEditIndex = session.patients.indexOf(patient)
+                                        } else {
+                                            resetPatientForm()
+                                        }
+
+                                        showPatientForm = true
+                                    },
+                                colors = CardDefaults.cardColors(
+                                    containerColor =
+                                        if (patient != null) GreenPrimary else Color.LightGray
+                                )
+                            ) {
+                                Column(
+                                    Modifier.padding(12.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text("Room $room", color = Color.White)
+                                    Text(patient?.patientName ?: "Empty", color = Color.White)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (showPatientForm) {
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                        .verticalScroll(rememberScrollState())
+                ) {
+
+                    Button(onClick = { showPatientForm = false }) {
+                        Text("← Back to Rooms")
+                    }
+
+                    Text("Room $selectedPatientRoom")
+
+                    OutlinedTextField(patientName, { patientName = it }, label = { Text("Name") })
+                    OutlinedTextField(patientAge, { patientAge = it }, label = { Text("Age") })
+                    OutlinedTextField(patientGender, { patientGender = it }, label = { Text("Gender") })
+                    OutlinedTextField(patientDiagnosis, { patientDiagnosis = it }, label = { Text("Diagnosis") })
+                    OutlinedTextField(patientAllergies, { patientAllergies = it }, label = { Text("Allergies") })
+                    OutlinedTextField(patientDiet, { patientDiet = it }, label = { Text("Diet") })
+                    OutlinedTextField(patientMobility, { patientMobility = it }, label = { Text("Mobility") })
+                    OutlinedTextField(patientPrecautions, { patientPrecautions = it }, label = { Text("Precautions") })
+                    OutlinedTextField(patientCodeStatus, { patientCodeStatus = it }, label = { Text("Code Status") })
+                    OutlinedTextField(patientNotes, { patientNotes = it }, label = { Text("Notes") })
+
+                    Spacer(Modifier.height(16.dp))
+
+                    Button(
+                        onClick = {
+                            val patient = Patient(
+                                roomNumber = selectedPatientRoom,
+                                patientName = patientName,
+                                age = patientAge,
+                                gender = patientGender,
+                                diagnosis = patientDiagnosis,
+                                allergies = patientAllergies,
+                                diet = patientDiet,
+                                mobility = patientMobility,
+                                precautions = patientPrecautions,
+                                codeStatus = patientCodeStatus,
+                                notes = patientNotes
+                            )
+
+                            if (patientEditIndex != null)
+                                session.patients[patientEditIndex!!] = patient
+                            else
+                                session.patients.add(patient)
+
+                            showPatientForm = false
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(GreenPrimary)
+                    ) {
+                        Text("Save Patient")
+                    }
+
+                    Button(
+                        onClick = {
+                            val existing = session.patients.find {
+                                it.roomNumber == selectedPatientRoom
+                            }
+
+                            if (existing != null) {
+                                session.patients.remove(existing)
+                                session.liveActivities.add(
+                                    LiveActivity(
+                                        workerName = "System",
+                                        roomId = selectedPatientRoom.toString(),
+                                        message = "Patient discharged"
+                                    )
+                                )
+                            }
+
+                            showPatientForm = false
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(Color.Red)
+                    ) {
+                        Text("Discharge")
                     }
                 }
             }
