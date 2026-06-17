@@ -90,54 +90,23 @@ fun CreatorAssignmentScreen(
         ) {
 
             // ================= TOP BAR =================
-            Surface(
-                color = GreenPrimary,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(100.dp)
-            ) {
+            Surface(color = GreenPrimary) {
                 Box(
                     Modifier
-                        .fillMaxSize()
+                        .fillMaxWidth()
                         .padding(16.dp)
                 ) {
-
-                    IconButton(
-                        onClick = onBack,
-                        modifier = Modifier.align(Alignment.CenterStart)
-                    ) {
-                        Icon(
-                            Icons.Default.ArrowBack,
-                            null,
-                            tint = Color.White
-                        )
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, null, tint = Color.White)
                     }
-
-                    Column(
+                    Text(
+                        "Creator Dashboard",
                         modifier = Modifier.align(Alignment.Center),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-
-                        Text(
-                            text = "Creator Dashboard",
-                            color = Color.White,
-                            style = MaterialTheme.typography.titleLarge
-                        )
-
-                        Text(
-                            text = "Session Code: ${session.code}",
-                            color = Color.White,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-
-                        Text(
-                            text = "Creator Code: ${session.creatorCode}",
-                            color = Color.White,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
+                        color = Color.White
+                    )
                 }
             }
+
             Spacer(Modifier.height(10.dp))
 
             // ================= LIVE ACTIVITY =================
